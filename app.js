@@ -2253,7 +2253,6 @@ class TenantsComponent {
           </div>
           <div class="header-actions">
             <button id="btn-export-tenants-excel" class="btn btn-secondary"><i class="fa-solid fa-file-excel text-success"></i> Export Excel</button>
-            <button id="btn-add-tenant" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> เพิ่มผู้เช่าใหม่</button>
           </div>
         </div>
 
@@ -2281,15 +2280,15 @@ class TenantsComponent {
             <span class="badge-pill badge-warning" style="font-size:1.1rem; font-weight:800; padding:0.3rem 0.75rem;">${pastTenants.length}</span>
           </div>
 
-          <div class="settings-card-item glass-card tenant-erp-card" id="card-btn-add-tenant-action" style="border-left:4px solid #3b82f6; cursor:pointer;">
-            <div style="display:flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:12px; background:#3b82f620; color:#3b82f6; font-size:1.35rem;">
+          <div class="settings-card-item glass-card tenant-erp-card" id="card-btn-add-tenant-action" style="border-left:4px solid #3b82f6; cursor:pointer; background:linear-gradient(135deg, rgba(59,130,246,0.08), rgba(59,130,246,0.02));">
+            <div style="display:flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:12px; background:#3b82f6; color:#ffffff; font-size:1.35rem; box-shadow:0 4px 12px rgba(59,130,246,0.3);">
               <i class="fa-solid fa-user-plus"></i>
             </div>
             <div style="flex:1;">
-              <h4 style="font-weight:700; font-size:1.05rem; margin:0 0 0.2rem 0; color:var(--text-main);">➕ ลงทะเบียนผู้เช่าใหม่</h4>
-              <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">ห้องว่างพร้อมเช่า: <strong>${vacantRoomsCount} ห้อง</strong></p>
+              <h4 style="font-weight:700; font-size:1.05rem; margin:0 0 0.2rem 0; color:var(--primary);">➕ ลงทะเบียนผู้เช่าใหม่</h4>
+              <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">คลิกตรงนี้เพื่อเพิ่มผู้เช่าใหม่ (ห้องว่าง: <strong>${vacantRoomsCount} ห้อง</strong>)</p>
             </div>
-            <i class="fa-solid fa-plus text-primary" style="font-size:1.2rem;"></i>
+            <i class="fa-solid fa-circle-plus text-primary" style="font-size:1.4rem;"></i>
           </div>
         </div>
 
@@ -2329,7 +2328,7 @@ class TenantsComponent {
                   <tr>
                     <td colspan="7" class="text-center text-muted" style="padding:2.5rem;">
                       <i class="fa-solid fa-users-slash" style="font-size:2rem; margin-bottom:0.5rem; display:block;"></i>
-                      ${this.activeTab === 'past' ? 'ไม่มีประวัติผู้เช่าเก่าในระบบ' : 'ยังไม่มีผู้เช่าปัจจุบันในระบบ กดปุ่ม "เพิ่มผู้เช่าใหม่" ด้านบนเพื่อเริ่มบันทึก'}
+                      ${this.activeTab === 'past' ? 'ไม่มีประวัติผู้เช่าเก่าในระบบ' : 'ยังไม่มีผู้เช่าปัจจุบันในระบบ คลิกกล่อง "➕ ลงทะเบียนผู้เช่าใหม่" เพื่อเพิ่มผู้เช่า'}
                     </td>
                   </tr>
                 ` : displayTenants.map(t => {
@@ -2367,14 +2366,14 @@ class TenantsComponent {
                         <div class="action-buttons" style="justify-content:center;">
                           ${isPast ? `
                             <button class="btn btn-success btn-xs btn-rerent-tenant" data-id="${t.id}" data-name="${t.name}">
-                              <i class="fa-solid fa-rotate-left"></i> นำกลับมาเช่าใหม่
+                              <i class="fa-solid fa-file-signature"></i> ทำสัญญาใหม่ / นำกลับมาเช่าใหม่
                             </button>
                             <button class="btn btn-secondary btn-xs btn-edit-tenant" data-id="${t.id}"><i class="fa-solid fa-pen text-info"></i> แก้ไข</button>
                             <button class="btn btn-danger btn-xs btn-hard-delete-tenant" data-id="${t.id}" data-name="${t.name}"><i class="fa-solid fa-trash"></i> ลบถาวร</button>
                           ` : `
                             <button class="btn btn-secondary btn-xs btn-gen-contract" data-id="${t.id}"><i class="fa-solid fa-file-contract text-warning"></i> สัญญา</button>
                             <button class="btn btn-secondary btn-xs btn-edit-tenant" data-id="${t.id}"><i class="fa-solid fa-pen text-info"></i> แก้ไข</button>
-                            <button class="btn btn-warning btn-xs btn-checkout-tenant" data-id="${t.id}" data-name="${t.name}"><i class="fa-solid fa-right-from-bracket"></i> ย้ายออก</button>
+                            <button class="btn btn-warning btn-xs btn-checkout-tenant" data-id="${t.id}" data-name="${t.name}"><i class="fa-solid fa-door-open"></i> ย้ายออก / ลบ</button>
                           `}
                         </div>
                       </td>
@@ -5682,50 +5681,71 @@ class App {
   static openCheckoutTenantModal(tenantId, tenantName) {
     const tenant = this.state.tenants.find(t => t.id === tenantId);
     const room = tenant ? this.state.rooms.find(r => r.id === tenant.assignedRoomId) : null;
+    const docCount = tenant && tenant.documents ? tenant.documents.length : 0;
 
     const modal = document.getElementById('app-modal');
     const dialog = modal.querySelector('.modal-dialog');
     dialog.innerHTML = `
       <div class="modal-header">
-        <h3><i class="fa-solid fa-right-from-bracket text-warning"></i> แจ้งย้ายออก / ย้ายไปประวัติผู้เช่าเก่า</h3>
+        <h3><i class="fa-solid fa-right-from-bracket text-warning"></i> เลือกขั้นตอนย้ายออก (Smart Checkout)</h3>
         <button class="close-modal-btn">&times;</button>
       </div>
       <div class="modal-body">
-        <p>คุณต้องการบันทึกการย้ายออกสำหรับผู้เช่า <strong>"${tenantName}"</strong> ใช่หรือไม่?</p>
-        <p class="text-muted text-sm">
-          <i class="fa-solid fa-circle-info text-info"></i> ข้อมูลผู้เช่ารายนี้จะถูกย้ายไปที่ <strong>"📜 ประวัติผู้เช่าเก่า"</strong> เพื่อเก็บประวัติไว้ หากผู้เช่ากลับมาเช่าอีกครั้งในอนาคต สามารถเลือกดึงข้อมูลเดิมกลับมาใช้ได้ทันที
-        </p>
+        <p style="font-size:1.05rem; margin-top:0;">กรุณาเลือกวิธีการย้ายออกสำหรับผู้เช่า <strong>"${tenantName}"</strong>:</p>
+        
+        <!-- Choice 1: Archive to Past Tenants (Recommended) -->
+        <div style="background:linear-gradient(135deg, rgba(254,243,199,0.5), rgba(254,243,199,0.2)); border:2px solid #f59e0b; border-radius:12px; padding:1.25rem; margin-bottom:1.25rem; position:relative;">
+          <span class="badge-pill badge-warning" style="position:absolute; top:-10px; right:15px; font-weight:800; padding:0.25rem 0.65rem;">แนะนำ (Recommended)</span>
+          <h4 style="margin:0 0 0.5rem 0; color:#92400e; font-weight:700; display:flex; align-items:center; gap:0.5rem;">
+            <i class="fa-solid fa-box-archive" style="font-size:1.2rem;"></i> 1. ย้ายไปประวัติผู้เช่าเก่า (Archive Former Tenant)
+          </h4>
+          <p style="font-size:0.88rem; color:#78350f; margin:0 0 0.75rem 0; line-height:1.4;">
+            ระบบจะเคลียร์สถานะห้องพักเดิม (${room ? `ห้อง ${room.name}` : 'ห้องพัก'}) ให้เป็น <strong>"ว่าง"</strong> ทันที แต่จะเก็บประวัติ ข้อมูลโปรไฟล์ และเอกสารแนบ (${docCount} ไฟล์) ไว้ในแท็บผู้เช่าเก่า เพื่อให้นำกลับมาทำสัญญาเช่าใหม่ได้ในอนาคต
+          </p>
 
-        ${room ? `
-          <div style="background:#fef3c7; border:1px solid #f59e0b; border-radius:8px; padding:1rem; margin-top:1rem;">
-            <p style="margin:0 0 0.5rem 0; font-weight:700; color:#92400e;">
-              <i class="fa-solid fa-door-open"></i> ห้องพักที่คืน: ห้อง ${room.name} (จะเปลี่ยนสถานะเป็น "ว่าง")
-            </p>
-            <label style="display:flex; align-items:flex-start; gap:0.5rem; cursor:pointer;">
-              <input type="checkbox" id="chk-reset-meters" style="margin-top:0.2rem;">
-              <span>
-                <strong>รีเซ็ตเลขมิเตอร์ไฟ-น้ำของห้อง ${room.name} เป็น 0</strong><br>
-                <span class="text-muted text-sm">(ไม่แนะนำถ้าผู้เช่าคนต่อไปใช้อ่านเลขมิเตอร์ต่อเนื่องจากเลขเดิม)</span>
-              </span>
+          ${room ? `
+            <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; background:rgba(255,255,255,0.7); padding:0.5rem 0.75rem; border-radius:8px; margin-bottom:0.75rem;">
+              <input type="checkbox" id="chk-reset-meters">
+              <span style="font-size:0.85rem; color:#451a03;"><strong>เคลียร์เลขอ่านมิเตอร์น้ำ-ไฟห้อง ${room.name} เป็น 0</strong> (ไม่ติ๊กหากผู้เช่าคนถัดไปใช้อ่านเลขมิเตอร์ต่อเนื่อง)</span>
             </label>
-          </div>
-        ` : ''}
+          ` : ''}
 
-        <div style="display:flex; gap:0.75rem; margin-top:1.5rem;">
-          <button id="btn-confirm-checkout" class="btn btn-warning" style="flex:1; font-weight:700;">
-            <i class="fa-solid fa-box-archive"></i> ยืนยันย้ายออก (ย้ายไปผู้เช่าเก่า)
+          <button id="btn-confirm-archive-checkout" class="btn btn-warning btn-full" style="padding:0.65rem; font-weight:700; font-size:0.95rem;">
+            <i class="fa-solid fa-box-archive"></i> ย้ายไปประวัติผู้เช่าเก่า (เก็บบันทึกประวัติไว้)
           </button>
-          <button class="btn btn-secondary close-modal-btn" style="flex:1;">ยกเลิก</button>
         </div>
+
+        <!-- Choice 2: Hard Delete -->
+        <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:1rem; margin-bottom:1rem;">
+          <h4 style="margin:0 0 0.35rem 0; color:#991b1b; font-weight:700; display:flex; align-items:center; gap:0.5rem;">
+            <i class="fa-solid fa-trash text-danger"></i> 2. ลบข้อมูลถาวร (Hard Delete)
+          </h4>
+          <p style="font-size:0.82rem; color:#7f1d1d; margin:0 0 0.65rem 0;">
+            ลบข้อมูลผู้เช่าและประวัติทั้งหมดออกจากระบบถาวรทันที (ไม่แนะนำ เว้นแต่เป็นข้อมูลผู้เช่าทดสอบ)
+          </p>
+          <button id="btn-confirm-hard-delete" class="btn btn-danger btn-full" style="padding:0.55rem; font-weight:700; font-size:0.88rem;">
+            <i class="fa-solid fa-trash"></i> ยืนยันลบข้อมูลถาวรออกจากระบบ
+          </button>
+        </div>
+
+        <button class="btn btn-secondary btn-full close-modal-btn" style="padding:0.6rem;">ยกเลิก / ปิดหน้าต่าง</button>
       </div>
     `;
+
     modal.classList.add('active');
     modal.querySelectorAll('.close-modal-btn').forEach(b => b.addEventListener('click', () => modal.classList.remove('active')));
 
-    document.getElementById('btn-confirm-checkout').addEventListener('click', () => {
+    document.getElementById('btn-confirm-archive-checkout').addEventListener('click', () => {
       const resetMeters = room ? document.getElementById('chk-reset-meters').checked : false;
       modal.classList.remove('active');
       this.checkoutTenant(tenantId, resetMeters);
+    });
+
+    document.getElementById('btn-confirm-hard-delete').addEventListener('click', () => {
+      if (confirm(`คุณต้องการลบข้อมูลผู้เช่า "${tenantName}" ออกจากระบบถาวรใช่หรือไม่?`)) {
+        modal.classList.remove('active');
+        this.deleteTenant(tenantId, { resetMeters: true, deleteInvoices: false });
+      }
     });
   }
 
@@ -5763,31 +5783,37 @@ class App {
 
     const vacantRooms = (this.state.rooms || []).filter(r => r.status === 'vacant');
     const todayStr = Formatters.thaiDate(new Date().toISOString().slice(0, 10));
+    const docCount = tenant.documents ? tenant.documents.length : 0;
 
     const modal = document.getElementById('app-modal');
     const dialog = modal.querySelector('.modal-dialog');
 
     dialog.innerHTML = `
       <div class="modal-header">
-        <h3><i class="fa-solid fa-rotate-left text-success"></i> นำผู้เช่าเดิมกลับมาเช่าใหม่</h3>
+        <h3><i class="fa-solid fa-file-signature text-success"></i> ทำสัญญาใหม่ / นำผู้เช่าเดิมกลับมาเช่า</h3>
         <button class="close-modal-btn">&times;</button>
       </div>
       <div class="modal-body">
-        <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:1rem; margin-bottom:1.25rem;">
-          <h4 style="margin:0 0 0.35rem 0; color:#166534;"><i class="fa-solid fa-user-check"></i> ผู้เช่าเดิม: <strong>${tenant.name}</strong></h4>
-          <p style="margin:0; font-size:0.85rem; color:#15803d;">
-            เลขบัตรประชาชน: <code>${Formatters.formatIdCard(tenant.idCard)}</code> | เบอร์โทร: ${tenant.tel}
-          </p>
+        <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:1.1rem; margin-bottom:1.25rem;">
+          <h4 style="margin:0 0 0.4rem 0; color:#166534; display:flex; align-items:center; gap:0.5rem;">
+            <i class="fa-solid fa-user-check" style="font-size:1.2rem;"></i> ดึงโปรไฟล์ผู้เช่าเดิม: <strong>${tenant.name}</strong>
+          </h4>
+          <div style="font-size:0.85rem; color:#15803d; line-height:1.6;">
+            <div>📌 <strong>เลขบัตรประชาชน:</strong> <code>${Formatters.formatIdCard(tenant.idCard)}</code></div>
+            <div>📞 <strong>เบอร์โทร:</strong> ${tenant.tel} ${tenant.lineId ? `| Line: ${tenant.lineId}` : ''}</div>
+            <div>🏠 <strong>ที่อยู่เดิม:</strong> ${tenant.address || '-'}</div>
+            <div>📎 <strong>เอกสารแนบเดิมที่ดึงกลับมาใช้:</strong> ${docCount > 0 ? `<span class="badge-pill badge-success">${docCount} ไฟล์ (บัตรประชาชน/ทะเบียนบ้าน)</span>` : '<span class="text-muted">ไม่มี</span>'}</div>
+          </div>
         </div>
 
         ${vacantRooms.length === 0 ? `
           <div style="background:#fef2f2; border:1px solid #fca5a5; color:#991b1b; padding:1rem; border-radius:8px;">
-            <i class="fa-solid fa-triangle-exclamation"></i> <strong>ไม่มีห้องว่างในขณะนี้:</strong> กรุณาเพิ่มห้องว่าง หรือย้ายออกห้องอื่นก่อนนำผู้เช่าเดิมกลับมาเข้าพัก
+            <i class="fa-solid fa-triangle-exclamation"></i> <strong>ไม่มีห้องว่างในขณะนี้:</strong> กรุณาเพิ่มห้องว่าง หรือย้ายออกห้องอื่นก่อนนำผู้เช่าเดิมกลับมาทำสัญญา
           </div>
         ` : `
           <form id="form-rerent">
             <div class="form-group" style="margin-bottom:1rem;">
-              <label style="font-weight:600;"><i class="fa-solid fa-door-open text-primary"></i> เลือกห้องว่างที่ต้องการให้เข้าพัก *:</label>
+              <label style="font-weight:600;"><i class="fa-solid fa-door-open text-primary"></i> เลือกห้องว่างที่ต้องการทำสัญญาเช่าใหม่ *:</label>
               <select id="rerent-room-id" class="form-control" required style="padding:0.6rem;">
                 <option value="">-- เลือกห้องว่าง --</option>
                 ${vacantRooms.map(r => `<option value="${r.id}">ห้อง ${r.name} (ชั้น ${r.floor} - ค่าเช่า ${Formatters.currency(r.baseRent)})</option>`).join('')}
@@ -5805,8 +5831,8 @@ class App {
               </div>
             </div>
 
-            <button type="submit" class="btn btn-success btn-full" style="padding:0.75rem; font-weight:700; font-size:1rem;">
-              <i class="fa-solid fa-check"></i> นำผู้เช่าเดิมเข้าพักห้องใหม่ทันที
+            <button type="submit" class="btn btn-success btn-full" style="padding:0.75rem; font-weight:700; font-size:1.02rem;">
+              <i class="fa-solid fa-file-contract"></i> ยืนยันทำสัญญาใหม่ (ดึงโปรไฟล์และเอกสารเดิม)
             </button>
           </form>
         `}
