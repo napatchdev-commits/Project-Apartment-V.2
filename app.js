@@ -1111,7 +1111,7 @@ class DBService {
         fields: [['id','id'],['name','name'],['idCard','id_card'],['tel','tel'],['lineId','line_id'],['email','email'],
                  ['address','address'],['startDate','start_date'],['endDate','end_date'],['assignedRoomId','assigned_room_id'],
                  ['depositAmount','deposit_amount'],['depositStatus','deposit_status'],
-                 ['witness1','witness1'],['witness2','witness2']]
+                 ['witness1','witness1'],['witness2','witness2'],['status','status'],['lastRoomName','last_room_name']]
       },
       invoices: {
         table: 'invoices', onConflict: 'room_id,month_key',
@@ -1135,7 +1135,7 @@ class DBService {
       ledger: {
         table: 'ledger', onConflict: 'id',
         fields: [['id','id'],['date','date'],['type','type'],['category','category'],['description','description'],
-                 ['amount','amount'],['recordedBy','recorded_by']]
+                 ['amount','amount'],['recordedBy','recorded_by'],['invoiceId','invoice_id']]
       },
       roomTypes: {
         table: 'room_types', onConflict: 'id',
