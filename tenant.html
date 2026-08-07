@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MyBills ผู้เช่า">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="description" content="ระบบแจ้งบิลห้องเช่า MyBills - ช่วยผู้เช่าตรวจสอบบิล ชำระเงิน แนบสลิป และรับใบเสร็จ">
+    <title>📱 MyBills - ระบบแจ้งบิลสำหรับผู้เช่า</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="tenant-style.css">
+</head>
+<body>
+
+    <div class="mybills-container">
+        <!-- Root Mount Point -->
+        <div id="tenant-app-root"></div>
+    </div>
+
+    <!-- Modal Shell -->
+    <div id="app-modal" class="app-modal">
+        <div class="modal-dialog"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script src="tenant-app.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('✅ Service Worker registered', reg.scope))
+            .catch(err => console.error('❌ Service Worker registration failed', err));
+        });
+      }
+    </script>
+</body>
+</html>

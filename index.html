@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ระบบหอพัก">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="description" content="ระบบจัดการห้องเช่า Enterprise - บันทึกผู้เช่า ออกบิลอัตโนมัติ สร้าง QR PromptPay และออกรายงาน พร้อมใช้งานบนทุกอุปกรณ์">
+    <title>🏠 ระบบจัดการหอพัก | Apartment Management System</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 for Professional Modern Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Modern Minimal CSS Design System -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Toast Notifications Root -->
+    <div id="toast-container"></div>
+
+    <!-- Application Shell Layout -->
+    <div id="app-root">
+        <!-- Sidebar Navigation Mount Point -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main View Workspace -->
+        <div class="main-content-wrapper">
+            <!-- Navbar Header Mount Point -->
+            <div id="navbar-container"></div>
+
+            <!-- Workspace Content View Container -->
+            <main id="main-workspace" class="main-workspace">
+                <!-- Skeleton Loader Placeholder -->
+                <div class="skeleton-loader-view">
+                    <div class="skeleton-header"></div>
+                    <div class="skeleton-cards-grid">
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal Dialog Popup Shell -->
+    <div id="app-modal" class="app-modal">
+        <div class="modal-dialog"></div>
+    </div>
+
+    <!-- Printable Paper/Slip Area (Only visible on paper) -->
+    <div id="print-receipt-area" class="print-only-area"></div>
+
+    <!-- SheetJS Library for Excel (.xlsx) Export & Import -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Standalone 100% Reliable App Controller -->
+    <script src="app.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('✅ Service Worker registered', reg.scope))
+            .catch(err => console.error('❌ Service Worker registration failed', err));
+        });
+      }
+    </script>
+</body>
+</html>
