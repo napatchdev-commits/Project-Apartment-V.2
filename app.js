@@ -9814,13 +9814,11 @@ class App {
           </ol>
 
           <div style="margin-top:2.5rem; font-size:0.95rem; line-height:1.9;">
-            <p>เบอร์เจ้าของห้อง: ${aptTel}</p>
-            <p>เบอร์สถานีตำรวจไทรน้อย 02-9238778</p>
-            <p>เบอร์สถานีอนามัยวัดราษฎร์นิยม 02-9855158</p>
+            <p>เบอร์เจ้าของห้อง: ${aptTelDisplay}</p>
 
             <div style="text-align:center; margin-top:2rem; font-weight:600;">
               <p>ขอบคุณทุกท่านที่ไว้ใจในบริการและให้ความร่วมมือในการใช้บริการจากเรา</p>
-              <h3 style="margin-top:0.4rem; font-size:1.2rem; color:var(--primary);">${aptName}</h3>
+              <h3 style="margin-top:0.4rem; font-size:1.2rem; color:var(--primary);">${aptName || 'ระบบจัดการหอพัก'}</h3>
             </div>
           </div>
         </div>
@@ -9925,13 +9923,11 @@ class App {
           </ol>
 
           <div style="margin-top:2.5rem; font-size:0.95rem; line-height:1.9;">
-            <p>เบอร์เจ้าของห้อง: ${aptTel}</p>
-            <p>เบอร์สถานีตำรวจไทรน้อย 02-9238778</p>
-            <p>เบอร์สถานีอนามัยวัดราษฎร์นิยม 02-9855158</p>
+            <p>เบอร์เจ้าของห้อง: ${aptTelDisplay}</p>
 
             <div style="text-align:center; margin-top:2rem; font-weight:600;">
               <p>ขอบคุณทุกท่านที่ไว้ใจในบริการและให้ความร่วมมือในการใช้บริการจากเรา</p>
-              <h3 style="margin-top:0.4rem; font-size:1.2rem; color:#000;">${aptName}</h3>
+              <h3 style="margin-top:0.4rem; font-size:1.2rem; color:#000;">${aptName || 'ระบบจัดการหอพัก'}</h3>
             </div>
           </div>
         </div>
