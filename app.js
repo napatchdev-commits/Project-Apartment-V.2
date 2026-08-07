@@ -5080,6 +5080,7 @@ class App {
         }
       });
     }
+  }
 
   static syncInvoiceToLedger(inv) {
     if (!inv) return;
