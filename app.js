@@ -816,7 +816,7 @@ class DBService {
     // Ensure default users are always present in the state to prevent locking out administrators when the database is wiped/empty
     if (!state.users || !Array.isArray(state.users) || state.users.length === 0) {
       state.users = [
-        { id: 'usr_super', username: 'superadmin', displayName: 'สมบัติ น้ำวน', role: 'super_admin', passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' /* sha256('admin') */ },
+        { id: 'usr_super', username: 'superadmin', displayName: 'ผู้ดูแลระบบ', role: 'super_admin', passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' /* sha256('admin') */ },
         { id: 'usr_admin', username: 'admin', displayName: 'เจ้าของหอพัก / แอดมิน', role: 'admin', passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' /* sha256('admin') */ },
         { id: 'usr_staff', username: 'staff', displayName: 'พนักงานต้อนรับ (Staff)', role: 'staff', passwordHash: '1562206543da764123c21bd524674f0a8aaf49c8a89744c97352fe677f7e4006' /* sha256('staff') */ }
       ];
@@ -1322,7 +1322,7 @@ class DBService {
       if (apiKey) data.settings.apiKey = apiKey;
       if (!data.users || !Array.isArray(data.users) || data.users.length === 0) {
         data.users = [
-          { id: 'usr_super', username: 'superadmin', displayName: 'สมบัติ น้ำวน', role: 'super_admin', passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' },
+          { id: 'usr_super', username: 'superadmin', displayName: 'ผู้ดูแลระบบ', role: 'super_admin', passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' },
           { id: 'usr_admin', username: 'admin', displayName: 'เจ้าของหอพัก / แอดมิน', role: 'admin', passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' },
           { id: 'usr_staff', username: 'staff', displayName: 'พนักงานต้อนรับ (Staff)', role: 'staff', passwordHash: '1562206543da764123c21bd524674f0a8aaf49c8a89744c97352fe677f7e4006' }
         ];
@@ -1748,7 +1748,7 @@ class DBService {
 class LoginComponent {
   static render(state) {
     const users = state.users || [
-      { username: 'superadmin', displayName: 'สมบัติ น้ำวน', role: 'super_admin' },
+      { username: 'superadmin', displayName: 'ผู้ดูแลระบบ', role: 'super_admin' },
       { username: 'admin', displayName: 'เจ้าของหอพัก / แอดมิน', role: 'admin' },
       { username: 'staff', displayName: 'พนักงานต้อนรับ (Staff)', role: 'staff' }
     ];
@@ -4745,7 +4745,7 @@ class App {
         const rememberMe = rememberMeInput ? rememberMeInput.checked : true;
 
         const defaultUsers = [
-          { id: 'usr_super', username: 'superadmin', displayName: 'สมบัติ น้ำวน', role: 'super_admin', passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' /* sha256('admin') */ },
+          { id: 'usr_super', username: 'superadmin', displayName: 'ผู้ดูแลระบบ', role: 'super_admin', passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' /* sha256('admin') */ },
           { id: 'usr_admin', username: 'admin', displayName: 'เจ้าของหอพัก / แอดมิน', role: 'admin', passwordHash: '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918' /* sha256('admin') */ },
           { id: 'usr_staff', username: 'staff', displayName: 'พนักงานต้อนรับ (Staff)', role: 'staff', passwordHash: '1562206543da764123c21bd524674f0a8aaf49c8a89744c97352fe677f7e4006' /* sha256('staff') */ }
         ];
@@ -8490,350 +8490,261 @@ class App {
     document.getElementById('ledger-form').addEventListener('submit', (e) => {
       e.preventDefault();
       const newLed = {
-        id: 'led_' + Date.now(),
-        date: document.getElementById('led-date').value,
-        type: document.getElementById('led-type').value,
-        category: document.getElementById('led-cat').value,
-        description: document.getElementById('led-desc').value,
-        amount: parseFloat(document.getElementById('led-amt').value) || 0,
-        recordedBy: 'admin'
-      };
+        id: 'led_' + Date.now()  static openOfficialContractModal(tenant, witness1Input = '', witness2Input = '') {
+    const room = this.state.rooms.find(r => r.id === tenant.assignedRoomId);
+    const settings = this.state.settings || {};
+    
+    const rawOwnerName = settings.bankAccountName || settings.apartmentName || '';
+    const ownerNameDisplay = (rawOwnerName && rawOwnerName.trim()) 
+      ? `<span class="dotted-fill">${rawOwnerName.trim()}</span>` 
+      : `<span style="display:inline-block; min-width:220px; border-bottom:1px dotted #000;">&nbsp;</span>`;
+      
+    const rawAddress = settings.address || '';
+    const aptAddressDisplay = (rawAddress && rawAddress.trim()) 
+      ? `<span class="dotted-fill">${rawAddress.trim()}</span>` 
+      : `<span style="display:inline-block; min-width:350px; border-bottom:1px dotted #000;">&nbsp;</span>`;
+      
+    const aptTelDisplay = (settings.tel && settings.tel.trim()) ? settings.tel.trim() : '-';
+    const aptName = settings.apartmentName || '';
 
-      if (!this.state.ledger) this.state.ledger = [];
-      this.state.ledger.unshift(newLed);
-      DBService.saveState(this.state);
-      modal.classList.remove('active');
-      this.switchTab('accounting');
-    });
-  }
+    const hasAddress = tenant.address && tenant.address.trim();
+    const today = new Date();
+    const d = {
+      day: today.getDate().toString(),
+      month: Formatters.thaiMonthBE(today.toISOString().slice(0, 7)).split(' ')[0],
+      year: (today.getFullYear() + 543).toString(),
+      tenantName: tenant.name,
+      tenantAddress: hasAddress ? tenant.address : '',
+      tenantAddressFormatted: hasAddress ? `<span class="dotted-fill">${tenant.address}</span>` : `<span style="display:inline-block; min-width:320px; border-bottom:1px dotted #000;">&nbsp;</span>`,
+      tenantIdCard: Formatters.formatIdCard(tenant.idCard),
+      tenantIdIssueDate: Formatters.thaiDate(tenant.startDate),
+      roomName: room ? room.name : 'A101',
+      startDateDay: tenant.startDate ? tenant.startDate.split('-')[2] : '1',
+      startDateMonth: tenant.startDate ? Formatters.thaiMonthBE(tenant.startDate.slice(0, 7)).split(' ')[0] : 'พฤษภาคม',
+      startDateYear: tenant.startDate ? (parseInt(tenant.startDate.split('-')[0], 10) + 543).toString() : '2568',
+      monthlyRentAmt: room ? room.baseRent.toLocaleString() : '3,500',
+      monthlyRentThai: Formatters.thaiBahtText(room ? (room.baseRent !== undefined ? room.baseRent : 3500) : 3500),
+      depositAmt: tenant.deposit ? tenant.deposit.initialBail.toLocaleString() : '7,000',
+      depositThai: Formatters.thaiBahtText(tenant.deposit ? tenant.deposit.initialBail : 7000),
+      witness1: witness1Input,
+      witness2: witness2Input
+    };
 
-  // --- 6. CALENDAR EVENTS ---
-  static bindCalendarEvents() {
-    const addEvtBtn = document.getElementById('btn-add-event');
-    if (addEvtBtn) {
-      addEvtBtn.addEventListener('click', () => this.openEventModal());
-    }
-
-    document.querySelectorAll('.btn-delete-event').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const id = e.currentTarget.getAttribute('data-id');
-        if (confirm('ลบวันนัดหมายนี้ใช่หรือไม่?')) {
-          const idx = this.state.events.findIndex(ev => ev.id === id);
-          if (idx !== -1) {
-            this.state.events.splice(idx, 1);
-            DBService.saveState(this.state);
-            this.switchTab('calendar');
-          }
-        }
-      });
-    });
-  }
-
-  static openEventModal() {
     const modal = document.getElementById('app-modal');
     const dialog = modal.querySelector('.modal-dialog');
 
     dialog.innerHTML = `
       <div class="modal-header">
-        <h3><i class="fa-solid fa-calendar-plus text-primary"></i> เพิ่มวันนัดหมายในปฏิทิน</h3>
+        <h3><i class="fa-solid fa-file-contract text-warning"></i> หนังสือสัญญาเช่าห้องแถว${aptName ? ` (${aptName})` : ''}</h3>
         <button class="close-modal-btn">&times;</button>
       </div>
-      <div class="modal-body">
-        <form id="event-form">
-          <div class="form-group">
-            <label>หัวข้อนัดหมาย *</label>
-            <input type="text" id="evt-title" class="form-control" placeholder="นัดช่างมาล้างแอร์ ชั้น 1" required>
+
+      <div class="contract-tab-switcher" style="padding-top: 1rem;">
+        <button class="contract-tab-btn active" id="tab-front-doc"><i class="fa-solid fa-file-lines"></i> ด้านหน้า (หนังสือสัญญา)</button>
+        <button class="contract-tab-btn" id="tab-back-doc"><i class="fa-solid fa-list-ol"></i> ด้านหลัง (กฎและมารยาท 13 ข้อ)</button>
+      </div>
+
+      <div class="modal-body" style="padding-top: 0.5rem;">
+        <div id="contract-front-view" class="contract-paper front-page">
+          <div style="text-align:center; font-weight:bold; font-size:1.4rem; margin-bottom:1.2rem;">
+            หนังสือสัญญาเช่าห้องแถว
           </div>
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-            <div class="form-group">
-              <label>วันที่นัดหมาย *</label>
-              <input type="date" id="evt-date" class="form-control" value="${new Date().toISOString().slice(0, 10)}" required>
+          <div style="text-align:right; margin-bottom:1rem; font-size:0.95rem;">
+            เขียนที่ ${aptAddressDisplay} โทร. ${aptTelDisplay}
+          </div>
+          <div style="text-align:right; margin-bottom:1.5rem; font-size:0.95rem;">
+            วันที่<span class="dotted-fill">${d.day}</span>เดือน<span class="dotted-fill">${d.month}</span>พ.ศ.<span class="dotted-fill">${d.year}</span>
+          </div>
+
+          <div style="line-height:2.2; font-size:0.95rem; text-align:justify;">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;โดยหนังสือฉบับนี้ ข้าพเจ้า <strong>${ownerNameDisplay}</strong> อยู่บ้านเลขที่ ${aptAddressDisplay} ซึ่งต่อไปในสัญญานี้เรียกว่า <strong>“ผู้ให้เช่า”</strong> ฝ่ายหนึ่งกับข้าพเจ้า <span class="dotted-fill">${d.tenantName}</span><br>
+            อยู่บ้านเลขที่ ${d.tenantAddressFormatted}<br>
+            ถือบัตรประชาชน <span class="dotted-fill">${d.tenantIdCard}</span> เมื่อวันที่ <span class="dotted-fill">${d.tenantIdIssueDate}</span><br>
+            ซึ่งต่อไปในสัญญานี้เรียกว่า <strong>“ผู้เช่า”</strong> อีกฝ่ายหนึ่ง ทั้งสองฝ่ายตกลงทำสัญญากันดังมีข้อความต่อไปนี้คือ<br>
+
+            <strong>ข้อ ๑.</strong> ผู้ให้เช่าตกลงให้เช่าและผู้เช่าตกลงเช่าห้องแถว/บ้าน <span class="dotted-fill">${d.roomName}</span> ตั้งอยู่ ณ. ${aptAddressDisplay} เริ่มตั้งแต่วันที่ <span class="dotted-fill">${d.startDateDay}</span> เดือน <span class="dotted-fill">${d.startDateMonth}</span> พ.ศ. <span class="dotted-fill">${d.startDateYear}</span> ถึงจนกว่าจะออก/ยกเลิกสัญญา<br>
+
+            <strong>ข้อ ๒.</strong> ผู้เช่าตกลงให้ค่าเช่าเป็นรายเดือนๆ ละ <span class="dotted-fill">${d.monthlyRentAmt}</span> บาท (<span class="dotted-fill">${d.monthlyRentThai}</span>) มีกำหนดชำระเงินค่าเช่าทุกวันที่ ๑ ของทุก ๆ เดือน หากผู้เช่าไม่ชำระตามกําหนดยอมให้ผู้ใช้เช่ายึดทรัพย์สินและใส่กุญแจห้องของผู้เช่าได้<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>๒.๑</strong> ผู้เช่าจะต้องจ่ายเงินค่ามัดจำไว้เพื่อเป็นหลักประกันในทรัพย์สิน/ค่าน้ำ ค่าไฟฟ้า ค่ากุญแจ และอื่นๆ จำนวน <span class="dotted-fill">${d.depositAmt}</span> บาท (<span class="dotted-fill">${d.depositThai}</span>) และจะคืนให้เมื่อครบกำหนด ๖ เดือน/เมื่อย้ายออก<br>
+
+            <strong>ข้อ ๓.</strong> ผู้เช่าได้ตรวจดูห้องเช่าแล้ว เห็นว่าทุกสิ่งอยู่ในสภาพเรียบร้อยใช้การได้อย่างสมบูรณ์จะดูแลมิให้ชำรุดทรุดโทรม และจะบำรุงรักษาให้อยู่ในสภาพดี พร้อมที่จะส่งมอบคืนตามสภาพเดิมทุกประการ และตกลงยอมให้ผู้เช่าหรือตัวแทน เข้าตรวจดูห้องได้ทุกเวลาภายหลังจากได้แจ้งความประสงค์ให้ผู้เช่าทราบแล้ว ถ้าผู้เช่าออกจากห้องแถวที่เช่าไม่ว่ากรณีใด ๆ ผู้เช่าจะเรียกร้องค่าเสียหายและ/หรือค่าขนย้ายจากผู้ให้เช่ามิได้<br>
+
+            <strong>ข้อ ๔.</strong> ผู้เช่าไม่มีสิทธินำห้องเช่า ที่เช่าออกให้ผู้อื่นเช่าช่วง หรือทำนิติกรรมใดๆ กับผู้อื่นในอันที่จะเป็นผลก่อให้เกิดความผูกพันในห้องเช่า ไม่ว่าโดยตรงหรือโดยปริยาย และจะไม่ทำการดัดแปลงหรือต่อเติมห้องเช่าไม่ว่าทั้งหมดหรือบางส่วน เว้นแต่จะได้รับความยินยอมเป็นหนังสือจากผู้ให้เช่า และหากผู้เช่าได้ทำการดัดแปลงหรือต่อเติมสิ่งใดตามที่ได้รับความยินยอมเมื่อใดแล้ว ผู้เช่ายอมยกกรรมสิทธิ์ในทรัพย์สินนั้นให้ตกเป็นของผู้ให้เช่านับแต่เมื่อนั้นด้วยทั้งสิ้น<br>
+
+            <strong>ข้อ ๕.</strong> ถ้าเกิดอัคคีภัยขึ้นไม่ว่ากรณีใดๆ ให้สัญญานี้เป็นอันสิ้นสุดลง<br>
+            <strong>ข้อ ๖.</strong> ผู้เช่า จะไม่ดำเนินการค้าใดๆ อันเป็นที่รังเกียจและผิดกฎหมายหรืออาจเป็นอันตรายแก่สถานที่เช่าและจะไม่กระทำหรือยอมให้ผู้อื่นกระทำในสิ่งใดๆ อันอาจพิสูจน์ได้ว่าเป็นความเสียหายหรือก่อความเดือดร้อนรำคาญแก่ผู้ให้เช่า หรือผู้อยู่ใกล้เคียง<br>
+            <strong>ข้อ ๗.</strong> เมื่อผู้เช่ากระทำผิดสัญญาข้อหนึ่งข้อใด ผู้ให้เช่ามีสิทธิบอกเลิกสัญญาได้ทันที และผู้เช่ายอมให้ผู้เช่าทรงไว้ซึ่งสิทธิที่จะเข้ายึดครอบครองสถานที่และสิ่งที่เช่าได้โดยพลัน<br><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;สัญญาฉบับนี้ทำขึ้นเป็นสองฉบับมีข้อความอย่างเดียวกัน ทั้งสองฝ่ายได้อ่านและเข้าใจข้อความในสัญญานี้โดยละเอียดดีแล้ว ต่างยึดถือไว้คนละฉบับ และได้ลงลายมือชื่อไว้เป็นสำคัญต่อหน้าพยาน
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem; margin-top:2.2rem; text-align:center;">
+            <div>
+              ลงชื่อ <span style="display:inline-block; width:150px; border-bottom:1px dotted #000;"></span> ผู้เช่า<br>
+              <div style="margin-top:0.4rem;">( <span class="dotted-fill">${d.tenantName}</span> )</div>
             </div>
-            <div class="form-group">
-              <label>หมวดหมู่ *</label>
-              <input type="text" id="evt-cat" class="form-control" value="ซ่อมบำรุง" required>
+            <div>
+              ลงชื่อ <span style="display:inline-block; width:150px; border-bottom:1px dotted #000;"></span> ผู้ให้เช่า<br>
+              <div style="margin-top:0.4rem;">( ${ownerNameDisplay} )</div>
+            </div>
+            <div style="margin-top:1.5rem;">
+              ลงชื่อ <span style="display:inline-block; width:150px; border-bottom:1px dotted #000;"></span> พยาน<br>
+              <div style="margin-top:0.4rem;">( ${d.witness1 ? `<span class="dotted-fill">${d.witness1}</span>` : '<span style="display:inline-block; width:150px; border-bottom:1px dotted #000;"></span>'} )</div>
+            </div>
+            <div style="margin-top:1.5rem;">
+              ลงชื่อ <span style="display:inline-block; width:150px; border-bottom:1px dotted #000;"></span> พยาน<br>
+              <div style="margin-top:0.4rem;">( ${d.witness2 ? `<span class="dotted-fill">${d.witness2}</span>` : '<span style="display:inline-block; width:150px; border-bottom:1px dotted #000;"></span>'} )</div>
             </div>
           </div>
-          <button type="submit" class="btn btn-primary btn-full" style="margin-top:1rem;"><i class="fa-solid fa-floppy-disk"></i> เพิ่มวันนัดหมาย</button>
-        </form>
+        </div>
+
+        <div id="contract-back-view" class="contract-paper back-page" style="display: none;">
+          <div style="text-align:center; font-weight:bold; font-size:1.4rem; margin-bottom:1.5rem;">
+            กฎและมารยาทในการอยู่เช่าห้อง/บ้าน
+          </div>
+
+          <ol style="line-height:2.1; font-size:0.95rem; margin-left:1.5rem; text-align:justify;">
+            <li>ทำหนังสือสัญญาห้องเช่าก่อนเข้าอยู่อาศัย (เงินมัดจำจะคืนเมื่ออยู่เกิน 6 เดือน)</li>
+            <li>จ่ายค่าเช่าทุกวันที่ 1 ของเดือน โดยมีค่าไฟฟ้ายูนิตละ 8 บาท / ค่าน้ำประปายูนิตละ 20 บาท</li>
+            <li>หากจ่ายเกินวันที่ 5 เสียค่าปรับ 200 บาท เกินวันที่ 15 เสียค่าปรับ 300 บาท / หากไม่มีการแจ้งภายใน 5 วัน (ล็อคห้องทันทีโดยไม่ต้องแจ้งให้ทราบ)</li>
+            <li>ห้ามตอกตะปู หรือใช้วัสดุใดที่ทำให้ผนังเป็นรูเด็ดขาด หากจำเป็นควรใช้ที่แขวนติดแทน ปรับจุดละ 200 บาท</li>
+            <li>ห้ามเสพสิ่งเสพติดทุกชนิด/มั่วสุม ถ้าผู้ให้เช่าทราบจะดำเนินการทางกฎหมายและเชิญออกทันที</li>
+            <li>ถ้ามีการดื่มสุรา/หรือจัดงานใด ๆ ไม่เกินเวลา 22.00 น.</li>
+            <li>ห้ามเลี้ยงสัตว์เลี้ยงที่ก่อให้เกิดความเสียหายกับห้องและรบกวนห้องข้างทุกชนิด หากเกิดความเสียหายชดใช้ทั้งหมดทุกกรณี</li>
+            <li>ถ้ามีเครื่องเสียงเวลาเปิดไม่ควรดังเกินจนเกิดความรำคาญแก่คนห้องอื่น (เตือน 3 ครั้ง เชิญออก)</li>
+            <li>หากทำสิ่งของภายในห้องชำรุดหรือเสียหาย ต้องเสียค่าปรับเท่ากับราคาของนั้น</li>
+            <li>หากหลอดไฟ ก๊อกน้ำเสื่อมสภาพ เครื่องปรับอากาศไม่เย็น กรุณาแจ้งผู้ให้เช่าทราบเพื่อแก้ไข</li>
+            <li>ควรปิดไฟ ปิดน้ำ ปิดเตาแก๊ส หรือเครื่องใช้ไฟฟ้าก่อนออกจากห้องทุกครั้ง</li>
+            <li>ควรปิดล็อคห้องด้วยลูกกุญแจอีกชั้น เพื่อความปลอดภัยต่อทรัพย์สิน (ผู้ให้เช่าไม่รับผิดชอบกรณีของสูญหายทุกกรณี)</li>
+            <li>กรุณาช่วยกันดูแลรักษาความสะอาดให้เรียบร้อยและเป็นระเบียบ</li>
+          </ol>
+
+          <div style="margin-top:2.5rem; font-size:0.95rem; line-height:1.9;">
+            <p>เบอร์เจ้าของห้อง: ${aptTelDisplay}</p>
+
+            <div style="text-align:center; margin-top:2rem; font-weight:600;">
+              <p>ขอบคุณทุกท่านที่ไว้ใจในบริการและให้ความร่วมมือในการใช้บริการจากเรา</p>
+              <h3 style="margin-top:0.4rem; font-size:1.2rem; color:var(--primary);">${aptName || 'ระบบจัดการหอพัก'}</h3>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-full" id="btn-do-print-official-contract" style="margin-top: 1.5rem;">
+          <i class="fa-solid fa-print"></i> สั่งพิมพ์หนังสือสัญญาเช่า (PDF หน้า-หลัง)
+        </button>
       </div>
     `;
 
     modal.classList.add('active');
     modal.querySelector('.close-modal-btn').addEventListener('click', () => modal.classList.remove('active'));
 
-    document.getElementById('event-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const newEvt = {
-        id: 'evt_' + Date.now(),
-        title: document.getElementById('evt-title').value,
-        date: document.getElementById('evt-date').value,
-        category: document.getElementById('evt-cat').value,
-        roomName: 'ทั่วไป'
-      };
+    const tabFront = document.getElementById('tab-front-doc');
+    const tabBack = document.getElementById('tab-back-doc');
+    const viewFront = document.getElementById('contract-front-view');
+    const viewBack = document.getElementById('contract-back-view');
 
-      if (!this.state.events) this.state.events = [];
-      this.state.events.unshift(newEvt);
-      DBService.saveState(this.state);
-      modal.classList.remove('active');
-      this.switchTab('calendar');
+    tabFront.addEventListener('click', () => {
+      tabFront.classList.add('active'); tabBack.classList.remove('active');
+      viewFront.style.display = 'block'; viewBack.style.display = 'none';
     });
-  }
-
-  // --- 7. REPORTS & BACKUP EVENTS ---
-  static bindReportsEvents() {
-    const expInc = document.querySelector('.btn-export-income-report');
-    if (expInc) {
-      expInc.addEventListener('click', () => {
-        const headers = ['เลขที่บิล', 'รอบเดือน', 'ห้อง', 'ผู้เช่า', 'ค่าเช่า', 'ค่าไฟ', 'ค่าน้ำ', 'ค่าขยะ', 'ยอดสุทธิ', 'สถานะ'];
-        const rows = this.state.invoices.map(i => [i.invoiceNumber, i.monthKey, i.roomName, i.tenantName, i.rentAmount, i.elecAmount, i.waterAmount, i.trashFee || 0, i.totalAmount, i.status === 'paid' ? 'ชำระแล้ว' : 'ค้างชำระ']);
-        ExportService.exportToExcel('รายงานรายรับประจำเดือน_Sombat.xlsx', [{ name: 'รายงานรายรับ', headers, rows }]);
-      });
-    }
-
-    const expOvd = document.querySelector('.btn-export-overdue-report');
-    if (expOvd) {
-      expOvd.addEventListener('click', () => {
-        const headers = ['เลขที่บิล', 'ห้อง', 'ผู้เช่า', 'ยอดค้างชำระ', 'กำหนดชำระ'];
-        const rows = this.state.invoices.filter(i => i.status === 'unpaid').map(i => [i.invoiceNumber, i.roomName, i.tenantName, i.outstandingAmount || i.totalAmount, i.dueDate]);
-        ExportService.exportToExcel('รายงานผู้เช่าค้างชำระ.xlsx', [{ name: 'ยอดค้างชำระ', headers, rows }]);
-      });
-    }
-
-    const expMtr = document.querySelector('.btn-export-meter-report');
-    if (expMtr) {
-      expMtr.addEventListener('click', () => {
-        const headers = ['ห้องพัก', 'มิเตอร์ไฟครั้งก่อน', 'มิเตอร์ไฟครั้งนี้', 'หน่วยไฟที่ใช้', 'มิเตอร์น้ำครั้งก่อน', 'มิเตอร์น้ำครั้งนี้', 'หน่วยน้ำที่ใช้'];
-        const rows = this.state.invoices.map(i => [i.roomName, i.elecPrev, i.elecCurr, (i.elecCurr - i.elecPrev) || 0, i.waterPrev, i.waterCurr, (i.waterCurr - i.waterPrev) || 0]);
-        ExportService.exportToExcel('รายงานมิเตอร์น้ำไฟ.xlsx', [{ name: 'มิเตอร์น้ำไฟ', headers, rows }]);
-      });
-    }
-
-    const expCtr = document.querySelector('.btn-export-contracts-report');
-    if (expCtr) {
-      expCtr.addEventListener('click', () => {
-        const headers = ['ผู้เช่า', 'เลขบัตรประชาชน', 'เบอร์โทร', 'ห้องพัก', 'วันเริ่มสัญญา', 'วันหมดสัญญา'];
-        const rows = this.state.tenants.map(t => {
-          const room = this.state.rooms.find(r => r.id === t.assignedRoomId);
-          return [t.name, Formatters.formatIdCard(t.idCard), t.tel, room ? room.name : '-', t.startDate || '-', t.endDate || '-'];
-        });
-        ExportService.exportToExcel('รายงานทะเบียนสัญญาเช่า.xlsx', [{ name: 'ทะเบียนสัญญาเช่า', headers, rows }]);
-      });
-    }
-
-    // Full Backup Excel & JSON
-    const btnFullExcel = document.getElementById('btn-full-backup-excel');
-    if (btnFullExcel) {
-      btnFullExcel.addEventListener('click', () => {
-        ExportService.exportFullBackupExcel(this.state);
-      });
-    }
-
-    const btnFullJson = document.getElementById('btn-full-backup-json');
-    if (btnFullJson) {
-      btnFullJson.addEventListener('click', () => {
-        DBService.exportJSON();
-      });
-    }
-
-    // Restore Data File Input Handler
-    const btnRestore = document.getElementById('btn-trigger-restore');
-    const restoreInput = document.getElementById('restore-file-input');
-
-    if (btnRestore && restoreInput) {
-      btnRestore.addEventListener('click', () => restoreInput.click());
-
-      restoreInput.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        try {
-          const parsed = await ImportService.parseFile(file);
-          this.openRestorePreviewModal(parsed);
-        } catch (err) {
-          alert('❌ ไม่สามารถอ่านไฟล์สำรองได้: ' + err.message);
-        }
-        restoreInput.value = '';
-      });
-    }
-
-    // 1. ปุ่ม "เริ่มใช้งานจริง" (Start Production Mode / Remove Demo Data - ใช้ครั้งเดียว)
-    const btnStartProd = document.getElementById('btn-start-production');
-    if (btnStartProd) {
-      btnStartProd.addEventListener('click', async () => {
-        if (!confirm('🚀 ยืนยันการเปลี่ยนเป็นโหมดใช้งานจริง (Start Production Mode)?\n\nระบบจะลบข้อมูลเดโม่ทั้งหมด 41 ห้อง, ผู้เช่า, บิล, แจ้งซ่อม และตั้งค่า is_demo_mode = false เพื่อปิดการสร้างห้องเดโม่อัตโนมัติถาวร ให้คุณสามารถเพิ่มห้องพักของตนเองได้ทันที')) {
-          return;
-        }
-
-        btnStartProd.disabled = true;
-        btnStartProd.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังลบข้อมูลเดโม่และเปลี่ยนเป็นโหมดใช้งานจริง...';
-
-        try {
-          await DBService.startProductionMode(this.state);
-          alert('🟢 เปลี่ยนเป็นโหมดใช้งานจริงเรียบร้อยแล้ว! ข้อมูลเดโม่ 41 ห้องถูกลบทิ้งถาวร และระบบปิดการสร้างห้องเดโม่อัตโนมัติแล้ว คุณสามารถเพิ่มห้องพักของตนเองได้เลย');
-          App.switchTab('rooms');
-        } catch (err) {
-          alert('❌ เกิดข้อผิดพลาดในการเปลี่ยนเป็นโหมดใช้งานจริง: ' + err.message);
-          btnStartProd.disabled = false;
-          btnStartProd.innerHTML = '<i class="fa-solid fa-rocket"></i> เริ่มใช้งานจริง (ลบ 41 ห้องเดโม่ & ปิด Seed ถาวร)';
-        }
-      });
-    }
-
-    // 2. ปุ่ม "ล้างข้อมูลการใช้งาน" (Clear Usage Data - ใช้ประจำ โดยไม่แตะห้องพัก)
-    const btnClearUsage = document.getElementById('btn-clear-usage-data');
-    if (btnClearUsage) {
-      btnClearUsage.addEventListener('click', async () => {
-        if (!confirm('🧹 ยืนยันการล้างข้อมูลการใช้งาน?\n\nระบบจะลบผู้เช่า, บิล, แจ้งซ่อม และประวัติรายรับ-รายจ่าย ทั้งหมด พร้อมรีเซ็ตสถานะห้องพักเป็นห้องว่าง (โดยห้ามลบและห้ามแตะต้องโครงสร้างห้องพักที่มีอยู่)')) {
-          return;
-        }
-
-        btnClearUsage.disabled = true;
-        btnClearUsage.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังล้างข้อมูลการใช้งาน...';
-
-        try {
-          await DBService.clearUsageData(this.state);
-          alert('🟢 ล้างข้อมูลการใช้งานเรียบร้อยแล้ว! ผู้เช่า, บิล, แจ้งซ่อมถูกล้าง และห้องพักทุกห้องถูกรีเซ็ตเป็นห้องว่าง โดยไม่กระทบโครงสร้างห้องพัก');
-          App.switchTab('rooms');
-        } catch (err) {
-          alert('❌ เกิดข้อผิดพลาดในการล้างข้อมูลการใช้งาน: ' + err.message);
-          btnClearUsage.disabled = false;
-          btnClearUsage.innerHTML = '<i class="fa-solid fa-broom"></i> ล้างข้อมูลการใช้งาน (ลบผู้เช่า/บิล โดยไม่แตะห้องพัก)';
-        }
-      });
-    }
-  }
-
-  static openRestorePreviewModal(parsedResult) {
-    const modal = document.getElementById('app-modal');
-    const dialog = modal.querySelector('.modal-dialog');
-
-    let previewHtml = '';
-    let restoredState = null;
-
-    if (parsedResult.type === 'json') {
-      const data = parsedResult.data || {};
-      const tenantCount = (data.tenants || []).length;
-      const roomCount = (data.rooms || []).length;
-      const invoiceCount = (data.invoices || []).length;
-      const repairCount = (data.repairs || []).length;
-      restoredState = data;
-      previewHtml = `
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:1.25rem; margin-bottom:1.25rem;">
-          <h4 style="margin-bottom:0.75rem; color:#0f172a;"><i class="fa-solid fa-file-code text-primary"></i> ตรวจพบข้อมูลในไฟล์ JSON Backup</h4>
-          <ul style="line-height:1.8; margin-left:1.25rem; color:#334155;">
-            <li><strong>รายชื่อผู้เช่า:</strong> ${tenantCount} รายการ</li>
-            <li><strong>รายการห้องพัก:</strong> ${roomCount} ห้อง</li>
-            <li><strong>ใบแจ้งหนี้ / ประวัติชำระ:</strong> ${invoiceCount} รายการ</li>
-            <li><strong>รายการแจ้งซ่อม:</strong> ${repairCount} รายการ</li>
-          </ul>
-        </div>
-      `;
-    } else if (parsedResult.type === 'excel') {
-      const wb = parsedResult.workbook || {};
-      const sheetNames = Object.keys(wb);
-      
-      previewHtml = `
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:1.25rem; margin-bottom:1.25rem;">
-          <h4 style="margin-bottom:0.75rem; color:#0f172a;"><i class="fa-solid fa-file-excel text-success"></i> ตรวจพบแท็บข้อมูลในไฟล์ Excel (${sheetNames.length} แท็บ)</h4>
-          <ul style="line-height:1.8; margin-left:1.25rem; color:#334155;">
-            ${sheetNames.map(name => `
-              <li><strong>${name}:</strong> ${wb[name].rows ? wb[name].rows.length : 0} แถวข้อมูล</li>
-            `).join('')}
-          </ul>
-        </div>
-      `;
-    }
-
-    dialog.innerHTML = `
-      <div class="modal-header">
-        <h3><i class="fa-solid fa-box-archive text-warning"></i> ยืนยันการกู้คืน / นำเข้าข้อมูลระบบ (Restore Data)</h3>
-        <button class="close-modal-btn">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:0.85rem; font-size:0.88rem; color:#b45309; margin-bottom:1.25rem;">
-          ⚠️ <strong>คำเตือน:</strong> การกู้คืนข้อมูลจะทำการอัปเดตและบันทึกฐานข้อมูลคลาวด์/ท้องถิ่นใหม่ด้วยข้อมูลจากไฟล์ กรุณาตรวจสอบความถูกต้องก่อนกดบันทึก
-        </div>
-
-        ${previewHtml}
-
-        <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
-          <button type="button" class="btn btn-secondary close-modal-btn">ยกเลิก</button>
-          <button type="button" class="btn btn-warning" id="btn-confirm-do-restore" style="font-weight:700;">
-            <i class="fa-solid fa-rotate-left"></i> ยืนยันกู้คืนข้อมูล
-          </button>
-        </div>
-      </div>
-    `;
-
-    modal.classList.add('active');
-    dialog.querySelectorAll('.close-modal-btn').forEach(b => b.addEventListener('click', () => modal.classList.remove('active')));
-
-    const confirmBtn = document.getElementById('btn-confirm-do-restore');
-    if (confirmBtn) {
-      confirmBtn.addEventListener('click', async () => {
-        confirmBtn.disabled = true;
-        confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึกกู้คืน...';
-
-        try {
-          if (parsedResult.type === 'json' && restoredState) {
-            this.state = { ...this.state, ...restoredState };
-            await DBService.saveState(this.state);
-          } else if (parsedResult.type === 'excel') {
-            alert('🟢 นำเข้าไฟล์สำรอง Excel เรียบร้อยแล้ว!');
-          }
-          
-          modal.classList.remove('active');
-          alert('🟢 การกู้คืนข้อมูลสำเร็จสมบูรณ์!');
-          this.render();
-        } catch (err) {
-          alert('❌ การกู้คืนข้อมูลล้มเหลว: ' + err.message);
-          confirmBtn.disabled = false;
-          confirmBtn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> ยืนยันกู้คืนข้อมูล';
-        }
-      });
-    }
-  }
-
-  // --- 8. RATES & SERVICE FEES EVENTS ---
-  static bindRatesEvents() {
-    const mainRatesForm = document.getElementById('form-rates-main');
-    if (mainRatesForm) {
-      mainRatesForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        this.state.rates.electricityRate = parseFloat(document.getElementById('rate-elec').value) || 8.0;
-        this.state.rates.waterRate = parseFloat(document.getElementById('rate-water').value) || 20.0;
-        this.state.rates.trashFee = parseFloat(document.getElementById('rate-trash').value) || 20.0;
-        // เว้นว่างหรือใส่ 0 = ไม่คิดค่านี้ (ไม่มี default แบบค่าเช่า/ไฟ/น้ำ/ขยะที่จำเป็นต้องมีค่า)
-        this.state.rates.internetFee = parseFloat(document.getElementById('rate-internet').value) || 0;
-        this.state.rates.commonFee = parseFloat(document.getElementById('rate-common').value) || 0;
-        DBService.saveState(this.state);
-        alert('✅ บันทึกปรับเรทค่าน้ำ ค่าไฟ และค่าขยะเรียบร้อยแล้ว!');
-      });
-    }
-
-    const addFeeBtn = document.getElementById('btn-add-custom-fee');
-    if (addFeeBtn) {
-      addFeeBtn.addEventListener('click', () => this.openCustomFeeModal());
-    }
-
-    document.querySelectorAll('.btn-edit-custom-fee').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const id = e.currentTarget.getAttribute('data-id');
-        const fee = (this.state.rates.customFees || []).find(f => f.id === id);
-        if (fee) this.openCustomFeeModal(fee);
-      });
+    tabBack.addEventListener('click', () => {
+      tabBack.classList.add('active'); tabFront.classList.remove('active');
+      viewFront.style.display = 'none'; viewBack.style.display = 'block';
     });
 
-    document.querySelectorAll('.btn-delete-custom-fee').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const id = e.currentTarget.getAttribute('data-id');
-        if (confirm('คุณต้องการลบรายการค่าใช้จ่ายนี้ใช่หรือไม่?')) {
-          const fees = this.state.rates.customFees || [];
-          const idx = fees.findIndex(f => f.id === id);
-          if (idx !== -1) {
-            fees.splice(idx, 1);
-            DBService.saveState(this.state);
+    document.getElementById('btn-do-print-official-contract').addEventListener('click', () => {
+      const printArea = document.getElementById('print-receipt-area');
+      printArea.innerHTML = `
+        <div class="contract-print-page front-page">
+          <div style="text-align:center; font-weight:bold; font-size:1.5rem; margin-bottom:1.2rem;">
+            หนังสือสัญญาเช่าห้องแถว
+          </div>
+          <div style="text-align:right; margin-bottom:1rem; font-size:0.95rem;">
+            เขียนที่ ${aptAddressDisplay} โทร. ${aptTelDisplay}
+          </div>
+          <div style="text-align:right; margin-bottom:1.5rem; font-size:0.95rem;">
+            วันที่<span class="dotted-fill">${d.day}</span>เดือน<span class="dotted-fill">${d.month}</span>พ.ศ.<span class="dotted-fill">${d.year}</span>
+          </div>
+
+          <div style="line-height:2.2; font-size:0.95rem; text-align:justify;">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;โดยหนังสือฉบับนี้ ข้าพเจ้า <strong>${ownerNameDisplay}</strong> อยู่บ้านเลขที่ ${aptAddressDisplay} ซึ่งต่อไปในสัญญานี้เรียกว่า <strong>“ผู้ให้เช่า”</strong> ฝ่ายหนึ่งกับข้าพเจ้า <span class="dotted-fill">${d.tenantName}</span><br>
+            อยู่บ้านเลขที่ ${d.tenantAddressFormatted}<br>
+            ถือบัตรประชาชน <span class="dotted-fill">${d.tenantIdCard}</span> เมื่อวันที่ <span class="dotted-fill">${d.tenantIdIssueDate}</span><br>
+            ซึ่งต่อไปในสัญญานี้เรียกว่า <strong>“ผู้เช่า”</strong> อีกฝ่ายหนึ่ง ทั้งสองฝ่ายตกลงทำสัญญากันดังมีข้อความต่อไปนี้คือ<br>
+
+            <strong>ข้อ ๑.</strong> ผู้ให้เช่าตกลงให้เช่าและผู้เช่าตกลงเช่าห้องแถว/บ้าน <span class="dotted-fill">${d.roomName}</span> ตั้งอยู่ ณ. ${aptAddressDisplay} เริ่มตั้งแต่วันที่ <span class="dotted-fill">${d.startDateDay}</span> เดือน <span class="dotted-fill">${d.startDateMonth}</span> พ.ศ. <span class="dotted-fill">${d.startDateYear}</span> ถึงจนกว่าจะออก/ยกเลิกสัญญา<br>
+
+            <strong>ข้อ ๒.</strong> ผู้เช่าตกลงให้ค่าเช่าเป็นรายเดือนๆ ละ <span class="dotted-fill">${d.monthlyRentAmt}</span> บาท (<span class="dotted-fill">${d.monthlyRentThai}</span>) มีกำหนดชำระเงินค่าเช่าทุกวันที่ ๑ ของทุก ๆ เดือน หากผู้เช่าไม่ชำระตามกําหนดยอมให้ผู้ใช้เช่ายึดทรัพย์สินและใส่กุญแจห้องของผู้เช่าได้<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>๒.๑</strong> ผู้เช่าจะต้องจ่ายเงินค่ามัดจำไว้เพื่อเป็นหลักประกันในทรัพย์สิน/ค่าน้ำ ค่าไฟฟ้า ค่ากุญแจ และอื่นๆ จำนวน <span class="dotted-fill">${d.depositAmt}</span> บาท (<span class="dotted-fill">${d.depositThai}</span>) และจะคืนให้เมื่อครบกำหนด ๖ เดือน/เมื่อย้ายออก<br>
+
+            <strong>ข้อ ๓.</strong> ผู้เช่าได้ตรวจดูห้องเช่าแล้ว เห็นว่าทุกสิ่งอยู่ในสภาพเรียบร้อยใช้การได้อย่างสมบูรณ์จะดูแลมิให้ชำรุดทรุดโทรม และจะบำรุงรักษาให้อยู่ในสภาพดี พร้อมที่จะส่งมอบคืนตามสภาพเดิมทุกประการ และตกลงยอมให้ผู้เช่าหรือตัวแทน เข้าตรวจดูห้องได้ทุกเวลาภายหลังจากได้แจ้งความประสงค์ให้ผู้เช่าทราบแล้ว ถ้าผู้เช่าออกจากห้องแถวที่เช่าไม่ว่ากรณีใด ๆ ผู้เช่าจะเรียกร้องค่าเสียหายและ/หรือค่าขนย้ายจากผู้ให้เช่ามิได้<br>
+
+            <strong>ข้อ ๔.</strong> ผู้เช่าไม่มีสิทธินำห้องเช่า ที่เช่าออกให้ผู้อื่นเช่าช่วง หรือทำนิติกรรมใดๆ กับผู้อื่นในอันที่จะเป็นผลก่อให้เกิดความผูกพันในห้องเช่า ไม่ว่าโดยตรงหรือโดยปริยาย และจะไม่ทำการดัดแปลงหรือต่อเติมห้องเช่าไม่ว่าทั้งหมดหรือบางส่วน เว้นแต่จะได้รับความยินยอมเป็นหนังสือจากผู้ให้เช่า และหากผู้เช่าได้ทำการดัดแปลงหรือต่อเติมสิ่งใดตามที่ได้รับความยินยอมเมื่อใดแล้ว ผู้เช่ายอมยกกรรมสิทธิ์ในทรัพย์สินนั้นให้ตกเป็นของผู้ให้เช่านับแต่เมื่อนั้นด้วยทั้งสิ้น<br>
+
+            <strong>ข้อ ๕.</strong> ถ้าเกิดอัคคีภัยขึ้นไม่ว่ากรณีใดๆ ให้สัญญานี้เป็นอันสิ้นสุดลง<br>
+            <strong>ข้อ ๖.</strong> ผู้เช่า จะไม่ดำเนินการค้าใดๆ อันเป็นที่รังเกียจและผิดกฎหมายหรืออาจเป็นอันตรายแก่สถานที่เช่าและจะไม่กระทำหรือยอมให้ผู้อื่นกระทำในสิ่งใดๆ อันอาจพิสูจน์ได้ว่าเป็นความเสียหายหรือก่อความเดือดร้อนรำคาญแก่ผู้ให้เช่า หรือผู้อยู่ใกล้เคียง<br>
+            <strong>ข้อ ๗.</strong> เมื่อผู้เช่ากระทำผิดสัญญาข้อหนึ่งข้อใด ผู้ให้เช่ามีสิทธิบอกเลิกสัญญาได้ทันที และผู้เช่ายอมให้ผู้เช่าทรงไว้ซึ่งสิทธิที่จะเข้ายึดครอบครองสถานที่และสิ่งที่เช่าได้โดยพลัน<br><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;สัญญาฉบับนี้ทำขึ้นเป็นสองฉบับมีข้อความอย่างเดียวกัน ทั้งสองฝ่ายได้อ่านและเข้าใจข้อความในสัญญานี้โดยละเอียดดีแล้ว ต่างยึดถือไว้คนละฉบับ และได้ลงลายมือชื่อไว้เป็นสำคัญต่อหน้าพยาน
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem; margin-top:2.2rem; text-align:center;">
+            <div>
+              ลงชื่อ <span style="display:inline-block; width:150px; border-bottom:1px dotted #000;"></span> ผู้เช่า<br>
+              <div style="margin-top:0.4rem;">( <span class="dotted-fill">${d.tenantName}</span> )</div>
+            </div>
+            <div>
+              ลงชื่อ <span style="display:inline-block; width:150px; border-bottom:1px dotted #000;"></span> ผู้ให้เช่า<br>
+              <div style="margin-top:0.4rem;">( ${ownerNameDisplay} )</div>
+            </div>
+            <div style="margin-top:1.5rem;">
+              ลงชื่อ <span style="display:inline-block; width:150px; border-bottom:1px dotted #000;"></span> พยาน<br>
+              <div style="margin-top:0.4rem;">( ${d.witness1 ? `<span class="dotted-fill">${d.witness1}</span>` : '<span style="display:inline-block; width:150px; border-bottom:1px dotted #000;"></span>'} )</div>
+            </div>
+            <div style="margin-top:1.5rem;">
+              ลงชื่อ <span style="display:inline-block; width:150px; border-bottom:1px dotted #000;"></span> พยาน<br>
+              <div style="margin-top:0.4rem;">( ${d.witness2 ? `<span class="dotted-fill">${d.witness2}</span>` : '<span style="display:inline-block; width:150px; border-bottom:1px dotted #000;"></span>'} )</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="contract-print-page back-page">
+          <div style="text-align:center; font-weight:bold; font-size:1.5rem; margin-bottom:1.5rem;">
+            กฎและมารยาทในการอยู่เช่าห้อง/บ้าน
+          </div>
+
+          <ol style="line-height:2.1; font-size:0.95rem; margin-left:1.5rem; text-align:justify;">
+            <li>ทำหนังสือสัญญาห้องเช่าก่อนเข้าอยู่อาศัย (เงินมัดจำจะคืนเมื่ออยู่เกิน 6 เดือน)</li>
+            <li>จ่ายค่าเช่าทุกวันที่ 1 ของเดือน โดยมีค่าไฟฟ้ายูนิตละ 8 บาท / ค่าน้ำประปายูนิตละ 20 บาท</li>
+            <li>หากจ่ายเกินวันที่ 5 เสียค่าปรับ 200 บาท เกินวันที่ 15 เสียค่าปรับ 300 บาท / หากไม่มีการแจ้งภายใน 5 วัน (ล็อคห้องทันทีโดยไม่ต้องแจ้งให้ทราบ)</li>
+            <li>ห้ามตอกตะปู หรือใช้วัสดุใดที่ทำให้ผนังเป็นรูเด็ดขาด หากจำเป็นควรใช้ที่แขวนติดแทน ปรับจุดละ 200 บาท</li>
+            <li>ห้ามเสพสิ่งเสพติดทุกชนิด/มั่วสุม ถ้าผู้ให้เช่าทราบจะดำเนินการทางกฎหมายและเชิญออกทันที</li>
+            <li>ถ้ามีการดื่มสุรา/หรือจัดงานใด ๆ ไม่เกินเวลา 22.00 น.</li>
+            <li>ห้ามเลี้ยงสัตว์เลี้ยงที่ก่อให้เกิดความเสียหายกับห้องและรบกวนห้องข้างทุกชนิด หากเกิดความเสียหายชดใช้ทั้งหมดทุกกรณี</li>
+            <li>ถ้ามีเครื่องเสียงเวลาเปิดไม่ควรดังเกินจนเกิดความรำคาญแก่คนห้องอื่น (เตือน 3 ครั้ง เชิญออก)</li>
+            <li>หากทำสิ่งของภายในห้องชำรุดหรือเสียหาย ต้องเสียค่าปรับเท่ากับราคาของนั้น</li>
+            <li>หากหลอดไฟ ก๊อกน้ำเสื่อมสภาพ เครื่องปรับอากาศไม่เย็น กรุณาแจ้งผู้ให้เช่าทราบเพื่อแก้ไข</li>
+            <li>ควรปิดไฟ ปิดน้ำ ปิดเตาแก๊ส หรือเครื่องใช้ไฟฟ้าก่อนออกจากห้องทุกครั้ง</li>
+            <li>ควรปิดล็อคห้องด้วยลูกกุญแจอีกชั้น เพื่อความปลอดภัยต่อทรัพย์สิน (ผู้ให้เช่าไม่รับผิดชอบกรณีของสูญหายทุกกรณี)</li>
+            <li>กรุณาช่วยกันดูแลรักษาความสะอาดให้เรียบร้อยและเป็นระเบียบ</li>
+          </ol>
+
+          <div style="margin-top:2.5rem; font-size:0.95rem; line-height:1.9;">
+            <p>เบอร์เจ้าของห้อง: ${aptTelDisplay}</p>
+
+            <div style="text-align:center; margin-top:2rem; font-weight:600;">
+              <p>ขอบคุณทุกท่านที่ไว้ใจในบริการและให้ความร่วมมือในการใช้บริการจากเรา</p>
+              <h3 style="margin-top:0.4rem; font-size:1.2rem; color:#000;">${aptName || 'ระบบจัดการหอพัก'}</h3>
+            </div>
+          </div>
+        </div>
+      `;
+
+      modal.style.display = 'none';
+      window.print();
+      setTimeout(() => {
+        modal.style.display = '';
+      }, 600);
+    });
+  }e);
             SettingsComponent.activeSection = 'rates';
             SettingsComponent.activeSection = 'users';
             this.switchTab('settings');
@@ -9744,7 +9655,7 @@ class App {
           </div>
 
           <div style="line-height:2.2; font-size:0.95rem; text-align:justify;">
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;โดยหนังสือฉบับนี้ ข้าพเจ้า <strong>นายสมบัติ น้ำวน</strong> อยู่บ้านเลขที่ ๔๕/๑๐ หมู่ที่ ๘ ตำบลราษฎร์นิยม อำเภอไทรน้อย จังหวัดนนทบุรี ซึ่งต่อไปในสัญญานี้เรียกว่า <strong>“ผู้ให้เช่า”</strong> ฝ่ายหนึ่งกับข้าพเจ้า <span class="dotted-fill">${d.tenantName}</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;โดยหนังสือฉบับนี้ ข้าพเจ้า <strong>${ownerNameDisplay}</strong> อยู่บ้านเลขที่ ${aptAddressDisplay} ซึ่งต่อไปในสัญญานี้เรียกว่า <strong>“ผู้ให้เช่า”</strong> ฝ่ายหนึ่งกับข้าพเจ้า <span class="dotted-fill">${d.tenantName}</span><br>
             อยู่บ้านเลขที่ ${d.tenantAddressFormatted}<br>
             ถือบัตรประชาชน <span class="dotted-fill">${d.tenantIdCard}</span> เมื่อวันที่ <span class="dotted-fill">${d.tenantIdIssueDate}</span><br>
             ซึ่งต่อไปในสัญญานี้เรียกว่า <strong>“ผู้เช่า”</strong> อีกฝ่ายหนึ่ง ทั้งสองฝ่ายตกลงทำสัญญากันดังมีข้อความต่อไปนี้คือ<br>
