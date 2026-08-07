@@ -5240,7 +5240,10 @@ class App {
         if (overlay) overlay.classList.toggle('active');
         return;
       }
-          if (drawerOverlay) {
+
+      // 6.1 Sidebar Drawer Backdrop Overlay Click
+      const drawerOverlay = e.target.closest('#sidebar-drawer-overlay');
+      if (drawerOverlay) {
         e.preventDefault();
         const sidebar = document.getElementById('app-sidebar');
         if (sidebar) sidebar.classList.remove('drawer-open', 'active');
