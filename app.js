@@ -6353,54 +6353,7 @@ class App {
     });
   }
 
-  // --- 2. TENANTS EVENTS ---
-  static bindTenantsEvents() {
-    const exportExcel = document.getElementById('btn-export-tenants-excel');
-    if (exportExcel) {
-      exportExcel.addEventListener('click', () => {
-        const headers = ['ชื่อ-นามสกุล', 'เลขบัตรประชาชน', 'เบอร์โทร', 'วันเริ่มสัญญา', 'วันหมดสัญญา'];
-        const rows = this.state.tenants.map(t => [t.name, t.idCard, t.tel, t.startDate, t.endDate]);
-        ExportService.exportToCSV('ทะเบียนผู้เช่า.csv', headers, rows);
-      });
-    }
 
-    const addBtn = document.getElementById('btn-add-tenant');
-    if (addBtn) {
-      addBtn.addEventListener('click', () => this.openTenantModal());
-    }
-
-    document.querySelectorAll('.btn-edit-tenant').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const tenantId = e.currentTarget.getAttribute('data-id');
-        const tenant = this.state.tenants.find(t => t.id === tenantId);
-        if (tenant) this.openTenantModal(tenant);
-      });
-    });
-
-    document.querySelectorAll('.btn-delete-tenant').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const tenantId = e.currentTarget.getAttribute('data-id');
-        const tenantName = e.currentTarget.getAttribute('data-name');
-        this.openDeleteTenantModal(tenantId, tenantName);
-      });
-    });
-
-    document.querySelectorAll('.btn-gen-contract').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const id = e.currentTarget.getAttribute('data-id');
-        const tenant = this.state.tenants.find(t => t.id === id);
-        if (tenant) this.openOfficialContractModal(tenant);
-      });
-    });
-
-    document.querySelectorAll('.btn-view-docs').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const id = e.currentTarget.getAttribute('data-id');
-        const tenant = this.state.tenants.find(t => t.id === id);
-        if (tenant) this.openViewTenantDocsModal(tenant);
-      });
-    });
-  }
 
   // อัปโหลดไฟล์เอกสารผู้เช่าขึ้น Supabase Storage แทนการฝัง base64 ลงคอลัมน์ file_url โดยตรง
   // (bucket: tenant-documents ต้องสร้างไว้ล่วงหน้าใน Supabase Dashboard → Storage และตั้งเป็น public)
