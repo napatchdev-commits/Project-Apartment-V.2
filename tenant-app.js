@@ -63,7 +63,7 @@ class PromptPayService {
     } else if (sanitizedTarget.length === 13) {
       formattedTarget = sanitizedTarget;
     } else {
-      formattedTarget = '0066805991691';
+      return '';
     }
 
     const targetType = sanitizedTarget.length === 10 ? '01' : '02';

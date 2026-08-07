@@ -2984,49 +2984,94 @@ class SettingsComponent {
     if (this.activeSection === 'apartment_info') {
       cardBody = `
         <div class="glass-card">
-          <h3><i class="fa-solid fa-building-columns text-primary"></i> ข้อมูลหอพัก & บัญชีธนาคารรับเงิน</h3>
-          <p class="text-muted" style="font-size:0.85rem; margin-top:0.25rem;">
-            ข้อมูลบัญชีธนาคารและเบอร์พร้อมเพย์จะถูกนำไปสร้าง QR Code ชำระเงินและออกบิลอัตโนมัติ
-          </p>
-          
-          <form id="form-bank-settings" style="margin-top:1rem;">
-            <div class="form-group" style="margin-bottom:0.85rem;">
-              <label style="font-weight:600;"><i class="fa-solid fa-building text-primary"></i> ชื่อหอพัก / สถานประกอบการ:</label>
-              <input type="text" id="setting-apt-name" class="form-control" value="${settings.apartmentName || ''}" placeholder="ชื่อหอพัก / สถานประกอบการ" required style="padding:0.55rem 0.75rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border-color); padding-bottom:0.75rem;">
+            <div>
+              <h3 style="margin:0;"><i class="fa-solid fa-id-card text-primary"></i> ตั้งค่าข้อมูลเจ้าของหอพัก & สถานประกอบการ</h3>
+              <p class="text-muted" style="font-size:0.85rem; margin-top:0.25rem; margin-bottom:0;">
+                ข้อมูลที่ตั้งค่าตรงนี้จะถูกนำไปเชื่อมโยง (Link) แสดงในหนังสือสัญญาเช่า, ใบเสร็จรับเงิน, แจ้งเตือน LINE และพอร์ทัลผู้เช่าโดยอัตโนมัติ
+              </p>
             </div>
+          </div>
 
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.85rem;">
-              <div class="form-group">
-                <label style="font-weight:600;"><i class="fa-solid fa-piggy-bank text-success"></i> ธนาคารรับเงิน:</label>
-                <select id="setting-bank-name" class="form-control" style="padding:0.55rem 0.75rem;">
-                  <option value="ธนาคารกรุงศรีอยุธยา (BAY)" ${settings.bankName === 'ธนาคารกรุงศรีอยุธยา (BAY)' ? 'selected' : ''}>ธนาคารกรุงศรีอยุธยา (BAY)</option>
-                  <option value="ธนาคารกสิกรไทย (KBANK)" ${settings.bankName === 'ธนาคารกสิกรไทย (KBANK)' ? 'selected' : ''}>ธนาคารกสิกรไทย (KBANK)</option>
-                  <option value="ธนาคารไทยพาณิชย์ (SCB)" ${settings.bankName === 'ธนาคารไทยพาณิชย์ (SCB)' ? 'selected' : ''}>ธนาคารไทยพาณิชย์ (SCB)</option>
-                  <option value="ธนาคารกรุงเทพ (BBL)" ${settings.bankName === 'ธนาคารกรุงเทพ (BBL)' ? 'selected' : ''}>ธนาคารกรุงเทพ (BBL)</option>
-                  <option value="ธนาคารกรุงไทย (KTB)" ${settings.bankName === 'ธนาคารกรุงไทย (KTB)' ? 'selected' : ''}>ธนาคารกรุงไทย (KTB)</option>
-                  <option value="ธนาคารออมสิน (GSB)" ${settings.bankName === 'ธนาคารออมสิน (GSB)' ? 'selected' : ''}>ธนาคารออมสิน (GSB)</option>
-                  <option value="PromptPay (พร้อมเพย์)" ${settings.bankName === 'PromptPay (พร้อมเพย์)' ? 'selected' : ''}>PromptPay (พร้อมเพย์)</option>
-                </select>
+          <form id="form-bank-settings">
+            <!-- Section 1: Landlord / Owner Info -->
+            <div style="background:var(--bg-app); border:1px solid var(--border-color); border-radius:12px; padding:1.25rem; margin-bottom:1.25rem;">
+              <h4 style="font-size:1.05rem; font-weight:700; color:var(--text-main); margin-top:0; margin-bottom:0.85rem; display:flex; align-items:center; gap:0.5rem;">
+                <i class="fa-solid fa-user-shield text-success"></i> 1. ข้อมูลเจ้าของหอพัก / ผู้ให้เช่า (Landlord Details)
+              </h4>
+              
+              <div class="form-group" style="margin-bottom:1rem;">
+                <label style="font-weight:600;"><i class="fa-solid fa-signature text-primary"></i> ชื่อ-นามสกุล เจ้าของหอพัก / ผู้ให้เช่า *:</label>
+                <input type="text" id="setting-owner-name" class="form-control" value="${settings.ownerName || settings.bankAccountName || ''}" placeholder="เช่น นายประเสริฐ มีสุข (ใช้แสดงเป็นผู้ให้เช่าในสัญญาเช่าและใบเสร็จ)" style="padding:0.6rem 0.75rem;">
+                <small class="text-muted" style="display:block; margin-top:0.35rem;"><i class="fa-solid fa-link text-info"></i> <strong>เชื่อมโยงข้อมูลไปที่:</strong> “ผู้ให้เช่า” ในหนังสือสัญญาเช่า และผู้อนุมัติรับเงินในใบเสร็จ</small>
               </div>
-              <div class="form-group">
-                <label style="font-weight:600;"><i class="fa-solid fa-credit-card text-info"></i> เลขที่บัญชีธนาคาร:</label>
-                <input type="text" id="setting-bank-no" class="form-control" value="${settings.bankAccountNo || ''}" placeholder="เลขที่บัญชีธนาคาร" style="padding:0.55rem 0.75rem;">
-              </div>
-            </div>
 
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.85rem;">
-              <div class="form-group">
-                <label style="font-weight:600;"><i class="fa-solid fa-user-check text-success"></i> ชื่อบัญชีผู้รับเงิน:</label>
-                <input type="text" id="setting-bank-acc-name" class="form-control" value="${settings.bankAccountName || ''}" placeholder="ชื่อบัญชีผู้รับเงิน" style="padding:0.55rem 0.75rem;">
-              </div>
-              <div class="form-group">
-                <label style="font-weight:600;"><i class="fa-solid fa-qrcode text-warning"></i> เบอร์พร้อมเพย์ (PromptPay ID):</label>
-                <input type="text" id="setting-promptpay-id" class="form-control" value="${settings.promptPayId || ''}" placeholder="เบอร์โทร หรือ เลขประจำตัวประชาชน" style="padding:0.55rem 0.75rem;">
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                <div class="form-group">
+                  <label style="font-weight:600;"><i class="fa-solid fa-phone text-success"></i> เบอร์โทรศัพท์ติดต่อเจ้าของหอพัก:</label>
+                  <input type="text" id="setting-apt-tel" class="form-control" value="${settings.tel || ''}" placeholder="เช่น 081-234-5678" style="padding:0.6rem 0.75rem;">
+                  <small class="text-muted" style="display:block; margin-top:0.35rem;"><i class="fa-solid fa-link text-info"></i> <strong>เชื่อมโยงข้อมูลไปที่:</strong> ท้ายหนังสือสัญญา, หัวใบแจ้งหนี้ และพอร์ทัลผู้เช่า</small>
+                </div>
+                
+                <div class="form-group">
+                  <label style="font-weight:600;"><i class="fa-solid fa-location-dot text-danger"></i> ที่อยู่หอพัก / สถานที่ออกเอกสารสัญญา:</label>
+                  <input type="text" id="setting-apt-address" class="form-control" value="${settings.address || ''}" placeholder="เช่น 123/45 หมู่ 2 ต.บางตลาด อ.ปากเกร็ด จ.นนทบุรี" style="padding:0.6rem 0.75rem;">
+                  <small class="text-muted" style="display:block; margin-top:0.35rem;"><i class="fa-solid fa-link text-info"></i> <strong>เชื่อมโยงข้อมูลไปที่:</strong> “เขียนที่” และสถานที่ตั้งหอพักในหนังสือสัญญา</small>
+                </div>
               </div>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-full" style="padding:0.6rem; font-weight:700; margin-top:0.35rem;">
-              <i class="fa-solid fa-floppy-disk"></i> บันทึกข้อมูลหอพัก & บัญชีธนาคาร
+            <!-- Section 2: Building / Apartment Info -->
+            <div style="background:var(--bg-app); border:1px solid var(--border-color); border-radius:12px; padding:1.25rem; margin-bottom:1.25rem;">
+              <h4 style="font-size:1.05rem; font-weight:700; color:var(--text-main); margin-top:0; margin-bottom:0.85rem; display:flex; align-items:center; gap:0.5rem;">
+                <i class="fa-solid fa-building text-info"></i> 2. ข้อมูลหอพัก & สถานประกอบการ (Apartment Details)
+              </h4>
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-weight:600;"><i class="fa-solid fa-building-circle-check text-primary"></i> ชื่อหอพัก / สถานประกอบการ *:</label>
+                <input type="text" id="setting-apt-name" class="form-control" value="${settings.apartmentName || ''}" placeholder="เช่น หอพักสุขสบาย (จะแสดงที่หัวเว็บและใบเสร็จ)" required style="padding:0.6rem 0.75rem;">
+                <small class="text-muted" style="display:block; margin-top:0.35rem;"><i class="fa-solid fa-link text-info"></i> <strong>เชื่อมโยงข้อมูลไปที่:</strong> โลโก้หัวเว็บ, หัวหนังสือสัญญา, หัวใบแจ้งหนี้, LINE Bot</small>
+              </div>
+            </div>
+
+            <!-- Section 3: Bank Account & PromptPay -->
+            <div style="background:var(--bg-app); border:1px solid var(--border-color); border-radius:12px; padding:1.25rem; margin-bottom:1.25rem;">
+              <h4 style="font-size:1.05rem; font-weight:700; color:var(--text-main); margin-top:0; margin-bottom:0.85rem; display:flex; align-items:center; gap:0.5rem;">
+                <i class="fa-solid fa-credit-card text-warning"></i> 3. บัญชีธนาคาร & PromptPay สำหรับรับชำระเงิน
+              </h4>
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; margin-bottom:0.85rem;">
+                <div class="form-group">
+                  <label style="font-weight:600;"><i class="fa-solid fa-piggy-bank text-success"></i> ธนาคารรับเงิน:</label>
+                  <select id="setting-bank-name" class="form-control" style="padding:0.55rem 0.75rem;">
+                    <option value="ธนาคารกสิกรไทย (KBANK)" ${settings.bankName === 'ธนาคารกสิกรไทย (KBANK)' ? 'selected' : ''}>ธนาคารกสิกรไทย (KBANK)</option>
+                    <option value="ธนาคารไทยพาณิชย์ (SCB)" ${settings.bankName === 'ธนาคารไทยพาณิชย์ (SCB)' ? 'selected' : ''}>ธนาคารไทยพาณิชย์ (SCB)</option>
+                    <option value="ธนาคารกรุงเทพ (BBL)" ${settings.bankName === 'ธนาคารกรุงเทพ (BBL)' ? 'selected' : ''}>ธนาคารกรุงเทพ (BBL)</option>
+                    <option value="ธนาคารกรุงไทย (KTB)" ${settings.bankName === 'ธนาคารกรุงไทย (KTB)' ? 'selected' : ''}>ธนาคารกรุงไทย (KTB)</option>
+                    <option value="ธนาคารกรุงศรีอยุธยา (BAY)" ${settings.bankName === 'ธนาคารกรุงศรีอยุธยา (BAY)' ? 'selected' : ''}>ธนาคารกรุงศรีอยุธยา (BAY)</option>
+                    <option value="ธนาคารออมสิน (GSB)" ${settings.bankName === 'ธนาคารออมสิน (GSB)' ? 'selected' : ''}>ธนาคารออมสิน (GSB)</option>
+                    <option value="PromptPay (พร้อมเพย์)" ${settings.bankName === 'PromptPay (พร้อมเพย์)' ? 'selected' : ''}>PromptPay (พร้อมเพย์)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label style="font-weight:600;"><i class="fa-solid fa-credit-card text-info"></i> เลขที่บัญชีธนาคาร:</label>
+                  <input type="text" id="setting-bank-no" class="form-control" value="${settings.bankAccountNo || ''}" placeholder="เลขที่บัญชีธนาคาร" style="padding:0.55rem 0.75rem;">
+                </div>
+              </div>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
+                <div class="form-group">
+                  <label style="font-weight:600;"><i class="fa-solid fa-user-check text-success"></i> ชื่อบัญชีผู้รับเงิน:</label>
+                  <input type="text" id="setting-bank-acc-name" class="form-control" value="${settings.bankAccountName || ''}" placeholder="ชื่อบัญชีผู้รับเงิน" style="padding:0.55rem 0.75rem;">
+                </div>
+                <div class="form-group">
+                  <label style="font-weight:600;"><i class="fa-solid fa-qrcode text-warning"></i> เบอร์พร้อมเพย์ (PromptPay ID):</label>
+                  <input type="text" id="setting-promptpay-id" class="form-control" value="${settings.promptPayId || ''}" placeholder="เบอร์โทร หรือ เลขประจำตัวประชาชน" style="padding:0.55rem 0.75rem;">
+                </div>
+              </div>
+              <small class="text-muted" style="display:block; margin-top:0.5rem;"><i class="fa-solid fa-link text-info"></i> <strong>เชื่อมโยงข้อมูลไปที่:</strong> สร้าง QR Code ชำระเงินในใบเสร็จ และหน้าโอนเงินพอร์ทัลผู้เช่า</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full" style="padding:0.75rem; font-weight:700; font-size:1.05rem;">
+              <i class="fa-solid fa-floppy-disk"></i> บันทึกข้อมูลเจ้าของหอพัก & บัญชีธนาคาร
             </button>
           </form>
         </div>
@@ -9035,6 +9080,15 @@ class App {
       bankForm.addEventListener('submit', (e) => {
         e.preventDefault();
         if (!this.state.settings) this.state.settings = {};
+
+        const ownerNameInput = document.getElementById('setting-owner-name');
+        const aptAddressInput = document.getElementById('setting-apt-address');
+        const aptTelInput = document.getElementById('setting-apt-tel');
+
+        if (ownerNameInput) this.state.settings.ownerName = ownerNameInput.value.trim();
+        if (aptAddressInput) this.state.settings.address = aptAddressInput.value.trim();
+        if (aptTelInput) this.state.settings.tel = aptTelInput.value.trim();
+
         this.state.settings.apartmentName = document.getElementById('setting-apt-name').value.trim();
         this.state.settings.bankName = document.getElementById('setting-bank-name').value;
         this.state.settings.bankAccountNo = document.getElementById('setting-bank-no').value.trim();
@@ -9042,7 +9096,8 @@ class App {
         this.state.settings.promptPayId = document.getElementById('setting-promptpay-id').value.trim();
 
         DBService.saveState(this.state);
-        alert('🟢 บันทึกข้อมูลหอพักและบัญชีธนาคารเรียบร้อยแล้ว!');
+        alert('🟢 บันทึกข้อมูลเจ้าของหอพักและบัญชีธนาคารเรียบร้อยแล้ว!\n\nระบบทำการอัปเดตข้อมูลเชื่อมโยงไปยังหนังสือสัญญาเช่า, ใบเสร็จรับเงิน, LINE Bot และพอร์ทัลผู้เช่าทันที');
+        App.render();
       });
     }
 
