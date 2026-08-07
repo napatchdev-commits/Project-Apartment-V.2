@@ -2292,18 +2292,15 @@ class TenantsComponent {
           </div>
         </div>
 
-        <!-- Filter Tab & Table Card -->
+        <!-- Table Header: label + search -->
         <div class="glass-card style-table-card">
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; padding:1.25rem; border-bottom:1px solid var(--border-color);">
-            <div class="contract-tab-switcher" style="margin:0; padding:0;">
-              <button class="contract-tab-btn ${this.activeTab === 'active' ? 'active' : ''}" id="tab-btn-active-tenants">
-                <i class="fa-solid fa-user-check text-success"></i> 🟢 ผู้เช่าปัจจุบัน (${activeTenants.length})
-              </button>
-              <button class="contract-tab-btn ${this.activeTab === 'past' ? 'active' : ''}" id="tab-btn-past-tenants">
-                <i class="fa-solid fa-clock-rotate-left text-warning"></i> 📜 ประวัติผู้เช่าเก่า (${pastTenants.length})
-              </button>
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; padding:1rem 1.25rem; border-bottom:1px solid var(--border-color);">
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              ${this.activeTab === 'past'
+                ? `<i class="fa-solid fa-clock-rotate-left text-warning"></i> <span style="font-weight:700; color:var(--text-main);">📜 ประวัติผู้เช่าเก่า</span> <span class="badge-pill badge-warning">${pastTenants.length} ราย</span>`
+                : `<i class="fa-solid fa-users text-success"></i> <span style="font-weight:700; color:var(--text-main);">🟢 ผู้เช่าปัจจุบัน</span> <span class="badge-pill badge-success">${activeTenants.length} ราย</span>`
+              }
             </div>
-
             <div style="position:relative; width:280px;">
               <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted);"></i>
               <input type="text" id="tenant-search-input" value="${this.searchQuery}" placeholder="ค้นหาชื่อ, เบอร์โทร, ห้อง..." style="width:100%; padding:0.5rem 0.75rem 0.5rem 2.2rem; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-app); color:var(--text-main); font-size:0.88rem;" />
