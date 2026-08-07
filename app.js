@@ -2215,9 +2215,14 @@ class ContractsComponent {
 }
 
 class TenantsComponent {
+  static activeTab = 'active'; // 'active' or 'past'
+  static searchQuery = '';
+
   static render(state) {
     if (!state.tenants) state.tenants = [];
-    const tenants = [...state.tenants].sort((a, b) => {
+
+    const allTenants = state.tenants;
+    const activeTenants = allTenants.filter(t => !t.status || t.status === 'active').sort((a, b) => {
       const roomA = state.rooms?.find(r => r.id === a.assignedRoomId);
       const roomB = state.rooms?.find(r => r.id === b.assignedRoomId);
       if (!roomA && !roomB) return 0;
@@ -2226,12 +2231,25 @@ class TenantsComponent {
       return DBService.compareRooms(roomA, roomB);
     });
 
+    const pastTenants = allTenants.filter(t => t.status === 'past').sort((a, b) => (b.endDate || '').localeCompare(a.endDate || ''));
+    const vacantRoomsCount = (state.rooms || []).filter(r => r.status === 'vacant').length;
+
+    const displayTenants = (this.activeTab === 'past' ? pastTenants : activeTenants).filter(t => {
+      if (!this.searchQuery) return true;
+      const q = this.searchQuery.toLowerCase();
+      const room = state.rooms.find(r => r.id === t.assignedRoomId);
+      return (t.name || '').toLowerCase().includes(q) ||
+             (t.idCard || '').toLowerCase().includes(q) ||
+             (t.tel || '').toLowerCase().includes(q) ||
+             (room && room.name.toLowerCase().includes(q));
+    });
+
     return `
       <div class="view-container animate-fade-in">
         <div class="view-header">
           <div>
-            <h2><i class="fa-solid fa-users text-primary"></i> จัดการข้อมูลผู้เช่าและเอกสารสัญญา</h2>
-            <p>บันทึกทะเบียนผู้เช่า เพิ่มผู้เช่าใหม่ แนบไฟล์บัตรประชาชน/ทะเบียนบ้าน แก้ไข และลบรายการ</p>
+            <h2><i class="fa-solid fa-users text-primary"></i> ระบบจัดการผู้เช่า & สัญญา (Tenants ERP Dashboard)</h2>
+            <p>จัดการทะเบียนผู้เช่าปัจจุบัน, ประวัติผู้เช่าเก่า (ย้ายออก), ลงทะเบียนใหม่ และนำผู้เช่าเดิมกลับมาเช่าต่อได้ทันที</p>
           </div>
           <div class="header-actions">
             <button id="btn-export-tenants-excel" class="btn btn-secondary"><i class="fa-solid fa-file-excel text-success"></i> Export Excel</button>
@@ -2239,56 +2257,125 @@ class TenantsComponent {
           </div>
         </div>
 
+        <!-- ERP Cards Dashboard -->
+        <div class="settings-grid" style="margin-bottom:1.5rem;">
+          <div class="settings-card-item glass-card tenant-erp-card ${this.activeTab === 'active' ? 'active-erp-card' : ''}" id="card-tab-active-tenants" style="border-left:4px solid #22c55e; cursor:pointer;">
+            <div style="display:flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:12px; background:#22c55e20; color:#22c55e; font-size:1.35rem;">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <div style="flex:1;">
+              <h4 style="font-weight:700; font-size:1.05rem; margin:0 0 0.2rem 0; color:var(--text-main);">🟢 ผู้เช่าปัจจุบัน (Active)</h4>
+              <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">ผู้เช่าที่กำลังพักอาศัยอยู่ขณะนี้ (${activeTenants.length} ราย)</p>
+            </div>
+            <span class="badge-pill badge-success" style="font-size:1.1rem; font-weight:800; padding:0.3rem 0.75rem;">${activeTenants.length}</span>
+          </div>
+
+          <div class="settings-card-item glass-card tenant-erp-card ${this.activeTab === 'past' ? 'active-erp-card' : ''}" id="card-tab-past-tenants" style="border-left:4px solid #f59e0b; cursor:pointer;">
+            <div style="display:flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:12px; background:#f59e0b20; color:#f59e0b; font-size:1.35rem;">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <div style="flex:1;">
+              <h4 style="font-weight:700; font-size:1.05rem; margin:0 0 0.2rem 0; color:var(--text-main);">📜 ประวัติผู้เช่าเก่า (Former)</h4>
+              <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">ย้ายออกแล้ว / สามารถนำกลับมาเช่าต่อได้ (${pastTenants.length} ราย)</p>
+            </div>
+            <span class="badge-pill badge-warning" style="font-size:1.1rem; font-weight:800; padding:0.3rem 0.75rem;">${pastTenants.length}</span>
+          </div>
+
+          <div class="settings-card-item glass-card tenant-erp-card" id="card-btn-add-tenant-action" style="border-left:4px solid #3b82f6; cursor:pointer;">
+            <div style="display:flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:12px; background:#3b82f620; color:#3b82f6; font-size:1.35rem;">
+              <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <div style="flex:1;">
+              <h4 style="font-weight:700; font-size:1.05rem; margin:0 0 0.2rem 0; color:var(--text-main);">➕ ลงทะเบียนผู้เช่าใหม่</h4>
+              <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">ห้องว่างพร้อมเช่า: <strong>${vacantRoomsCount} ห้อง</strong></p>
+            </div>
+            <i class="fa-solid fa-plus text-primary" style="font-size:1.2rem;"></i>
+          </div>
+        </div>
+
+        <!-- Filter Tab & Table Card -->
         <div class="glass-card style-table-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; padding:1.25rem; border-bottom:1px solid var(--border-color);">
+            <div class="contract-tab-switcher" style="margin:0; padding:0;">
+              <button class="contract-tab-btn ${this.activeTab === 'active' ? 'active' : ''}" id="tab-btn-active-tenants">
+                <i class="fa-solid fa-user-check text-success"></i> 🟢 ผู้เช่าปัจจุบัน (${activeTenants.length})
+              </button>
+              <button class="contract-tab-btn ${this.activeTab === 'past' ? 'active' : ''}" id="tab-btn-past-tenants">
+                <i class="fa-solid fa-clock-rotate-left text-warning"></i> 📜 ประวัติผู้เช่าเก่า (${pastTenants.length})
+              </button>
+            </div>
+
+            <div style="position:relative; width:280px;">
+              <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted);"></i>
+              <input type="text" id="tenant-search-input" value="${this.searchQuery}" placeholder="ค้นหาชื่อ, เบอร์โทร, ห้อง..." style="width:100%; padding:0.5rem 0.75rem 0.5rem 2.2rem; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-app); color:var(--text-main); font-size:0.88rem;" />
+            </div>
+          </div>
+
           <div class="table-responsive">
             <table class="custom-table" id="tenants-table">
               <thead>
                 <tr>
                   <th>ชื่อ - นามสกุล</th>
-                  <th>ห้องพัก</th>
+                  <th>${this.activeTab === 'past' ? 'ห้องที่เคยอยู่' : 'ห้องพักปัจจุบัน'}</th>
                   <th>เลขบัตรประชาชน</th>
                   <th>เบอร์โทร / Line</th>
                   <th>เอกสารแนบ</th>
-                  <th>วันเริ่ม - สิ้นสุดสัญญา</th>
-                  <th>การจัดการ</th>
+                  <th>${this.activeTab === 'past' ? 'วันที่ย้ายออก' : 'วันเริ่ม - สิ้นสุดสัญญา'}</th>
+                  <th style="text-align:center;">การจัดการ</th>
                 </tr>
               </thead>
               <tbody>
-                ${tenants.length === 0 ? `
-                  <tr><td colspan="7" class="text-center text-muted" style="padding:2rem;">ยังไม่มีข้อมูลผู้เช่าในระบบ กดปุ่ม "เพิ่มผู้เช่าใหม่" ด้านบนเพื่อเพิ่มข้อมูล</td></tr>
-                ` : tenants.map(t => {
+                ${displayTenants.length === 0 ? `
+                  <tr>
+                    <td colspan="7" class="text-center text-muted" style="padding:2.5rem;">
+                      <i class="fa-solid fa-users-slash" style="font-size:2rem; margin-bottom:0.5rem; display:block;"></i>
+                      ${this.activeTab === 'past' ? 'ไม่มีประวัติผู้เช่าเก่าในระบบ' : 'ยังไม่มีผู้เช่าปัจจุบันในระบบ กดปุ่ม "เพิ่มผู้เช่าใหม่" ด้านบนเพื่อเริ่มบันทึก'}
+                    </td>
+                  </tr>
+                ` : displayTenants.map(t => {
                   const room = state.rooms.find(r => r.id === t.assignedRoomId);
-                  const roomBadge = room ? `<span class="badge-pill badge-primary">ห้อง ${room.name}</span>` : `<span class="badge-pill badge-gray">ยังไม่ระบุ</span>`;
+                  const roomBadge = room ? `<span class="badge-pill badge-primary">ห้อง ${room.name}</span>` : (t.lastRoomName ? `<span class="badge-pill badge-secondary">เคยอยู่ ${t.lastRoomName}</span>` : `<span class="badge-pill badge-gray">ยังไม่ระบุ</span>`);
                   const docCount = t.documents ? t.documents.length : 0;
+                  const isPast = t.status === 'past';
+
                   return `
                     <tr>
-                      <td><strong>${t.name}</strong></td>
+                      <td><strong>${t.name}</strong> ${isPast ? '<span class="badge-pill badge-warning" style="font-size:0.7rem; margin-left:0.3rem;">ผู้เช่าเก่า</span>' : ''}</td>
                       <td>${roomBadge}</td>
                       <td><code>${Formatters.formatIdCard(t.idCard)}</code></td>
                       <td>${t.tel} ${t.lineId ? `(${t.lineId})` : ''}</td>
                       <td>
                         <div style="display:flex; flex-direction:column; gap:0.25rem; align-items:flex-start;">
                           <button class="btn btn-secondary btn-xs btn-view-docs" data-id="${t.id}" style="width:100%; text-align:left;">
-                            <i class="fa-solid fa-folder-open text-primary"></i> \u0e40\u0e2d\u0e01\u0e2a\u0e32\u0e23\u0e17\u0e35\u0e48\u0e07\u0e2b\u0e21\u0e14 (${docCount})
+                            <i class="fa-solid fa-folder-open text-primary"></i> เอกสารทั้งหมด (${docCount})
                           </button>
                           ${(t.documents || []).some(d => d.category === 'idcard' && d.dataUrl) ? `
                             <a href="${(t.documents || []).find(d => d.category === 'idcard').dataUrl}" target="_blank" class="btn btn-success btn-xs" style="width:100%; font-size:0.75rem; text-align:left; padding:0.15rem 0.35rem;">
-                              <i class="fa-solid fa-id-card"></i> \u0e14\u0e39\u0e1a\u0e31\u0e15\u0e23\u0e15\u0e23\u0e30\u0e0a\u0e32\u0e0a\u0e19
-                            </a>
-                          ` : ''}
-                          ${(t.documents || []).some(d => d.category === 'house' && d.dataUrl) ? `
-                            <a href="${(t.documents || []).find(d => d.category === 'house').dataUrl}" target="_blank" class="btn btn-info btn-xs" style="width:100%; font-size:0.75rem; text-align:left; padding:0.15rem 0.35rem;">
-                              <i class="fa-solid fa-house-user"></i> \u0e14\u0e39\u0e17\u0e30\u0e40\u0e1a\u0e35\u0e22\u0e19\u0e1a\u0e4c\u0e32\u0e19
+                              <i class="fa-solid fa-id-card"></i> บัตรประชาชน
                             </a>
                           ` : ''}
                         </div>
                       </td>
-                      <td>${Formatters.thaiDate(t.startDate)} ➔ <strong class="text-warning">${Formatters.thaiDate(t.endDate)}</strong></td>
                       <td>
-                        <div class="action-buttons">
-                          <button class="btn btn-secondary btn-xs btn-gen-contract" data-id="${t.id}"><i class="fa-solid fa-file-contract text-warning"></i> สัญญา</button>
-                          <button class="btn btn-secondary btn-xs btn-edit-tenant" data-id="${t.id}"><i class="fa-solid fa-pen text-info"></i> แก้ไข</button>
-                          <button class="btn btn-danger btn-xs btn-delete-tenant" data-id="${t.id}" data-name="${t.name}"><i class="fa-solid fa-trash"></i> ลบ</button>
+                        ${isPast ? `
+                          <span class="text-muted"><i class="fa-solid fa-door-open text-danger"></i> ย้ายออกเมื่อ: ${Formatters.thaiDate(t.endDate || t.updatedAt || '-')}</span>
+                        ` : `
+                          ${Formatters.thaiDate(t.startDate)} ➔ <strong class="text-warning">${Formatters.thaiDate(t.endDate)}</strong>
+                        `}
+                      </td>
+                      <td style="text-align:center;">
+                        <div class="action-buttons" style="justify-content:center;">
+                          ${isPast ? `
+                            <button class="btn btn-success btn-xs btn-rerent-tenant" data-id="${t.id}" data-name="${t.name}">
+                              <i class="fa-solid fa-rotate-left"></i> นำกลับมาเช่าใหม่
+                            </button>
+                            <button class="btn btn-secondary btn-xs btn-edit-tenant" data-id="${t.id}"><i class="fa-solid fa-pen text-info"></i> แก้ไข</button>
+                            <button class="btn btn-danger btn-xs btn-hard-delete-tenant" data-id="${t.id}" data-name="${t.name}"><i class="fa-solid fa-trash"></i> ลบถาวร</button>
+                          ` : `
+                            <button class="btn btn-secondary btn-xs btn-gen-contract" data-id="${t.id}"><i class="fa-solid fa-file-contract text-warning"></i> สัญญา</button>
+                            <button class="btn btn-secondary btn-xs btn-edit-tenant" data-id="${t.id}"><i class="fa-solid fa-pen text-info"></i> แก้ไข</button>
+                            <button class="btn btn-warning btn-xs btn-checkout-tenant" data-id="${t.id}" data-name="${t.name}"><i class="fa-solid fa-right-from-bracket"></i> ย้ายออก</button>
+                          `}
                         </div>
                       </td>
                     </tr>
@@ -2596,45 +2683,203 @@ class RepairsComponent {
 }
 
 class AccountingComponent {
+  static activeTab = 'all'; // 'all', 'income', 'expense', 'auto'
+  static searchQuery = '';
+
   static render(state) {
+    // Ensure all paid invoices are synced to ledger
+    App.syncAllPaidInvoicesToLedger();
+
     const ledger = state.ledger || [];
-    let totalIncome = 0; let totalExpense = 0;
+    let totalIncome = 0; 
+    let totalExpense = 0;
+    let autoIncome = 0;
+    let manualIncome = 0;
+
+    const incomeList = [];
+    const expenseList = [];
+    const autoList = [];
+
     ledger.forEach(entry => {
-      if (entry.type === 'income') totalIncome += entry.amount;
-      else totalExpense += entry.amount;
+      if (entry.type === 'income') {
+        totalIncome += Number(entry.amount || 0);
+        incomeList.push(entry);
+        if (entry.invoiceId || (entry.id && String(entry.id).startsWith('led_inv_'))) {
+          autoIncome += Number(entry.amount || 0);
+          autoList.push(entry);
+        } else {
+          manualIncome += Number(entry.amount || 0);
+        }
+      } else {
+        totalExpense += Number(entry.amount || 0);
+        expenseList.push(entry);
+      }
     });
+
+    let displayLedger = ledger;
+    if (this.activeTab === 'income') displayLedger = incomeList;
+    else if (this.activeTab === 'expense') displayLedger = expenseList;
+    else if (this.activeTab === 'auto') displayLedger = autoList;
+
+    if (this.searchQuery) {
+      const q = this.searchQuery.toLowerCase();
+      displayLedger = displayLedger.filter(l => 
+        (l.description || '').toLowerCase().includes(q) ||
+        (l.category || '').toLowerCase().includes(q) ||
+        (l.recordedBy || '').toLowerCase().includes(q)
+      );
+    }
 
     return `
       <div class="view-container animate-fade-in">
         <div class="view-header">
-          <div><h2><i class="fa-solid fa-scale-balanced text-primary"></i> ระบบบัญชี รายรับ - รายจ่าย (Accounting Ledger)</h2><p>บันทึกรายรับค่าน้ำไฟค่าเช่า และรายจ่ายแม่บ้าน ค่าซ่อมบำรุง ค่าน้ำไฟหลวง</p></div>
+          <div>
+            <h2><i class="fa-solid fa-scale-balanced text-primary"></i> ระบบบัญชี รายรับ - รายจ่าย (Accounting ERP Dashboard)</h2>
+            <p>บันทึกรายรับ-รายจ่าย พร้อมระบบ Auto Sync ดึงรายรับการชำระค่าเช่าห้องพักเข้าบัญชีให้อัตโนมัติ</p>
+          </div>
           <div class="header-actions">
-            <button id="btn-add-ledger" class="btn btn-primary"><i class="fa-solid fa-plus"></i> บันทึกรายรับ-รายจ่ายใหม่</button>
+            <button id="btn-add-ledger" class="btn btn-primary"><i class="fa-solid fa-plus"></i> บันทึกรายการใหม่</button>
           </div>
         </div>
 
-        <div class="kpi-cards-grid">
-          <div class="kpi-card card-green"><div class="kpi-content"><span class="label">รายรับรวม</span><h3 class="value text-success">${Formatters.currency(totalIncome)}</h3></div></div>
-          <div class="kpi-card card-red"><div class="kpi-content"><span class="label">รายจ่ายรวม</span><h3 class="value text-danger">${Formatters.currency(totalExpense)}</h3></div></div>
-          <div class="kpi-card card-blue"><div class="kpi-content"><span class="label">กำไรสุทธิ</span><h3 class="value text-primary">${Formatters.currency(totalIncome - totalExpense)}</h3></div></div>
+        <!-- KPI Summary Cards -->
+        <div class="kpi-cards-grid" style="margin-bottom:1.5rem;">
+          <div class="kpi-card card-green">
+            <div class="kpi-content">
+              <span class="label">รายรับรวมทั้งหมด (Total Income)</span>
+              <h3 class="value text-success">${Formatters.currency(totalIncome)}</h3>
+              <small class="text-muted" style="font-size:0.75rem;">(อัตโนมัติ: ${Formatters.currency(autoIncome)} | ทั่วไป: ${Formatters.currency(manualIncome)})</small>
+            </div>
+          </div>
+          <div class="kpi-card card-red">
+            <div class="kpi-content">
+              <span class="label">รายจ่ายรวมทั้งหมด (Total Expenses)</span>
+              <h3 class="value text-danger">${Formatters.currency(totalExpense)}</h3>
+              <small class="text-muted" style="font-size:0.75rem;">(รวม ${expenseList.length} รายการ)</small>
+            </div>
+          </div>
+          <div class="kpi-card card-blue">
+            <div class="kpi-content">
+              <span class="label">กำไรสุทธิ (Net Profit)</span>
+              <h3 class="value ${totalIncome - totalExpense >= 0 ? 'text-primary' : 'text-danger'}">${Formatters.currency(totalIncome - totalExpense)}</h3>
+              <small class="text-muted" style="font-size:0.75rem;">(รายรับ - รายจ่าย)</small>
+            </div>
+          </div>
+          <div class="kpi-card card-yellow">
+            <div class="kpi-content">
+              <span class="label">รายรับจากค่าเช่า (Auto Sync)</span>
+              <h3 class="value text-warning">${Formatters.currency(autoIncome)}</h3>
+              <small class="text-muted" style="font-size:0.75rem;">(ดึงจากบิลชำระแล้ว ${autoList.length} ใบ)</small>
+            </div>
+          </div>
         </div>
 
-        <div class="glass-card style-table-card" style="margin-top:1.5rem;">
+        <!-- ERP Cards Grid Dashboard -->
+        <div class="settings-grid" style="margin-bottom:1.5rem;">
+          <div class="settings-card-item glass-card ledger-erp-card ${this.activeTab === 'income' ? 'active-erp-card' : ''}" id="card-tab-income" style="border-left:4px solid #22c55e; cursor:pointer;">
+            <div style="display:flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:12px; background:#22c55e20; color:#22c55e; font-size:1.35rem;">
+              <i class="fa-solid fa-arrow-trend-up"></i>
+            </div>
+            <div style="flex:1;">
+              <h4 style="font-weight:700; font-size:1.05rem; margin:0 0 0.2rem 0; color:var(--text-main);">📈 รายการรายรับ (Income)</h4>
+              <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">ค่าเช่าห้องพัก, ค่าน้ำไฟ และรายรับอื่นๆ (${incomeList.length} รายการ)</p>
+            </div>
+            <span class="badge-pill badge-success" style="font-size:1rem; font-weight:800;">${Formatters.currency(totalIncome)}</span>
+          </div>
+
+          <div class="settings-card-item glass-card ledger-erp-card ${this.activeTab === 'expense' ? 'active-erp-card' : ''}" id="card-tab-expense" style="border-left:4px solid #ef4444; cursor:pointer;">
+            <div style="display:flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:12px; background:#ef444420; color:#ef4444; font-size:1.35rem;">
+              <i class="fa-solid fa-arrow-trend-down"></i>
+            </div>
+            <div style="flex:1;">
+              <h4 style="font-weight:700; font-size:1.05rem; margin:0 0 0.2rem 0; color:var(--text-main);">📉 รายการรายจ่าย (Expense)</h4>
+              <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">ค่าซ่อมบำรุง, ค่าอุปกรณ์ และค่าใช้จ่ายทั่วไป (${expenseList.length} รายการ)</p>
+            </div>
+            <span class="badge-pill badge-danger" style="font-size:1rem; font-weight:800;">${Formatters.currency(totalExpense)}</span>
+          </div>
+
+          <div class="settings-card-item glass-card ledger-erp-card ${this.activeTab === 'auto' ? 'active-erp-card' : ''}" id="card-tab-auto" style="border-left:4px solid #f59e0b; cursor:pointer;">
+            <div style="display:flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:12px; background:#f59e0b20; color:#f59e0b; font-size:1.35rem;">
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div style="flex:1;">
+              <h4 style="font-weight:700; font-size:1.05rem; margin:0 0 0.2rem 0; color:var(--text-main);">⚡ Auto Sync ค่าเช่า</h4>
+              <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">ดึงรายได้จากการชำระค่าเช่าเข้าบัญชีอัตโนมัติ (${autoList.length} ใบ)</p>
+            </div>
+            <span class="badge-pill badge-warning" style="font-size:1rem; font-weight:800;">${Formatters.currency(autoIncome)}</span>
+          </div>
+        </div>
+
+        <!-- Filter Tab & Table Card -->
+        <div class="glass-card style-table-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; padding:1.25rem; border-bottom:1px solid var(--border-color);">
+            <div class="contract-tab-switcher" style="margin:0; padding:0;">
+              <button class="contract-tab-btn ${this.activeTab === 'all' ? 'active' : ''}" id="ledger-tab-all">
+                <i class="fa-solid fa-list-ul"></i> 📊 ทั้งหมด (${ledger.length})
+              </button>
+              <button class="contract-tab-btn ${this.activeTab === 'income' ? 'active' : ''}" id="ledger-tab-income">
+                <i class="fa-solid fa-arrow-trend-up text-success"></i> 📈 รายรับ (${incomeList.length})
+              </button>
+              <button class="contract-tab-btn ${this.activeTab === 'expense' ? 'active' : ''}" id="ledger-tab-expense">
+                <i class="fa-solid fa-arrow-trend-down text-danger"></i> 📉 รายจ่าย (${expenseList.length})
+              </button>
+              <button class="contract-tab-btn ${this.activeTab === 'auto' ? 'active' : ''}" id="ledger-tab-auto">
+                <i class="fa-solid fa-bolt text-warning"></i> ⚡ Auto Sync ค่าเช่า (${autoList.length})
+              </button>
+            </div>
+
+            <div style="position:relative; width:260px;">
+              <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted);"></i>
+              <input type="text" id="ledger-search-input" value="${this.searchQuery}" placeholder="ค้นหารายการ, หมวดหมู่..." style="width:100%; padding:0.5rem 0.75rem 0.5rem 2.2rem; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-app); color:var(--text-main); font-size:0.88rem;" />
+            </div>
+          </div>
+
           <div class="table-responsive">
             <table class="custom-table">
-              <thead><tr><th>วันที่</th><th>ประเภท</th><th>หมวดหมู่</th><th>รายการรายละเอียด</th><th>จำนวนเงิน</th><th>บันทึกโดย</th><th>การจัดการ</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>วันที่</th>
+                  <th>ประเภท</th>
+                  <th>หมวดหมู่</th>
+                  <th>รายการรายละเอียด</th>
+                  <th>จำนวนเงิน</th>
+                  <th>บันทึกโดย</th>
+                  <th style="text-align:center;">การจัดการ</th>
+                </tr>
+              </thead>
               <tbody>
-                ${ledger.map(l => `
+                ${displayLedger.length === 0 ? `
                   <tr>
-                    <td>${Formatters.thaiDate(l.date)}</td>
-                    <td><span class="badge-pill ${l.type === 'income' ? 'badge-success' : 'badge-danger'}">${l.type === 'income' ? '📈 รายรับ' : '📉 รายจ่าย'}</span></td>
-                    <td>${l.category}</td>
-                    <td><strong>${l.description}</strong></td>
-                    <td><strong class="${l.type === 'income' ? 'text-success' : 'text-danger'}">${Formatters.currency(l.amount)}</strong></td>
-                    <td>${l.recordedBy || 'admin'}</td>
-                    <td><button class="btn btn-danger btn-xs btn-delete-ledger" data-id="${l.id}"><i class="fa-solid fa-trash"></i> ลบ</button></td>
+                    <td colspan="7" class="text-center text-muted" style="padding:2.5rem;">
+                      <i class="fa-solid fa-receipt" style="font-size:2rem; margin-bottom:0.5rem; display:block;"></i>
+                      ยังไม่มีรายการบัญชีในหมวดหมู่นี้
+                    </td>
                   </tr>
-                `).join('')}
+                ` : displayLedger.map(l => {
+                  const isAuto = l.invoiceId || (l.id && String(l.id).startsWith('led_inv_'));
+                  return `
+                    <tr>
+                      <td>${Formatters.thaiDate(l.date)}</td>
+                      <td>
+                        <span class="badge-pill ${l.type === 'income' ? 'badge-success' : 'badge-danger'}">
+                          ${l.type === 'income' ? '📈 รายรับ' : '📉 รายจ่าย'}
+                        </span>
+                        ${isAuto ? '<span class="badge-pill badge-warning" style="font-size:0.7rem; margin-left:0.25rem;"><i class="fa-solid fa-bolt"></i> Auto Sync</span>' : ''}
+                      </td>
+                      <td>${l.category}</td>
+                      <td><strong>${l.description}</strong></td>
+                      <td><strong class="${l.type === 'income' ? 'text-success' : 'text-danger'}">${Formatters.currency(l.amount)}</strong></td>
+                      <td>${isAuto ? '<span class="text-primary" style="font-weight:600;"><i class="fa-solid fa-robot"></i> ระบบบิล</span>' : (l.recordedBy || 'admin')}</td>
+                      <td style="text-align:center;">
+                        ${isAuto ? `
+                          <span class="text-muted text-sm" title="รายการนี้ถูกซิงค์อัตโนมัติจากบิลค่าเช่า"><i class="fa-solid fa-link text-info"></i> ลิงก์จากบิล</span>
+                        ` : `
+                          <button class="btn btn-danger btn-xs btn-delete-ledger" data-id="${l.id}"><i class="fa-solid fa-trash"></i> ลบ</button>
+                        `}
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
               </tbody>
             </table>
           </div>
@@ -4836,9 +5081,50 @@ class App {
       });
     }
 
+  static syncInvoiceToLedger(inv) {
+    if (!inv) return;
+    if (!this.state.ledger) this.state.ledger = [];
+
+    const ledgerKey = 'led_inv_' + (inv.id || inv.invoiceNumber);
+    const existingIdx = this.state.ledger.findIndex(l => l.id === ledgerKey || l.invoiceId === inv.id);
+
+    if (inv.status === 'paid') {
+      const amount = Number(inv.paidAmount || inv.totalAmount || 0);
+      const date = inv.paymentDate || (inv.updatedAt ? inv.updatedAt.slice(0, 10) : new Date().toISOString().slice(0, 10));
+      const description = `ชำระค่าเช่าห้อง ${inv.roomName || ''} (${inv.tenantName || 'ผู้เช่า'}) - บิล ${inv.invoiceNumber || ''}`;
+
+      const ledgerEntry = {
+        id: ledgerKey,
+        invoiceId: inv.id,
+        date: date,
+        type: 'income',
+        category: 'ค่าเช่าห้องพัก / ค่าน้ำไฟ',
+        description: description,
+        amount: amount,
+        recordedBy: 'system'
+      };
+
+      if (existingIdx !== -1) {
+        this.state.ledger[existingIdx] = { ...this.state.ledger[existingIdx], ...ledgerEntry };
+      } else {
+        this.state.ledger.unshift(ledgerEntry);
+      }
+    } else {
+      if (existingIdx !== -1) {
+        this.state.ledger.splice(existingIdx, 1);
+      }
+    }
+  }
+
+  static syncAllPaidInvoicesToLedger() {
+    if (!this.state || !this.state.invoices || !Array.isArray(this.state.invoices)) return;
+    this.state.invoices.forEach(inv => {
+      this.syncInvoiceToLedger(inv);
+    });
   }
 
   static switchTab(tabId) {
+    this.syncAllPaidInvoicesToLedger();
     if (tabId === 'billing' || tabId === 'slip-verification' || tabId === 'dashboard') {
       const changed = DBService.updateInvoicePenalties(this.state);
       if (changed) {
@@ -4954,10 +5240,7 @@ class App {
         if (overlay) overlay.classList.toggle('active');
         return;
       }
-
-      // 6.1 Sidebar Drawer Backdrop Overlay Click
-      const drawerOverlay = e.target.closest('#sidebar-drawer-overlay');
-      if (drawerOverlay) {
+          if (drawerOverlay) {
         e.preventDefault();
         const sidebar = document.getElementById('app-sidebar');
         if (sidebar) sidebar.classList.remove('drawer-open', 'active');
@@ -5305,6 +5588,315 @@ class App {
           }
         }
       });
+    });
+  }
+
+  // --- 2. TENANTS EVENTS ---
+  static bindTenantsEvents() {
+    const exportExcel = document.getElementById('btn-export-tenants-excel');
+    if (exportExcel) {
+      exportExcel.addEventListener('click', () => {
+        const headers = ['ชื่อ-นามสกุล', 'เลขบัตรประชาชน', 'เบอร์โทร', 'สถานะ', 'วันเริ่มสัญญา', 'วันหมดสัญญา'];
+        const rows = this.state.tenants.map(t => [t.name, t.idCard, t.tel, t.status === 'past' ? 'ผู้เช่าเก่า' : 'ผู้เช่าปัจจุบัน', t.startDate, t.endDate]);
+        ExportService.exportToCSV('ทะเบียนผู้เช่า.csv', headers, rows);
+      });
+    }
+
+    // ERP Cards & Tabs
+    const cardActive = document.getElementById('card-tab-active-tenants');
+    const tabActive = document.getElementById('tab-btn-active-tenants');
+    if (cardActive) cardActive.addEventListener('click', () => { TenantsComponent.activeTab = 'active'; this.switchTab('tenants'); });
+    if (tabActive) tabActive.addEventListener('click', () => { TenantsComponent.activeTab = 'active'; this.switchTab('tenants'); });
+
+    const cardPast = document.getElementById('card-tab-past-tenants');
+    const tabPast = document.getElementById('tab-btn-past-tenants');
+    if (cardPast) cardPast.addEventListener('click', () => { TenantsComponent.activeTab = 'past'; this.switchTab('tenants'); });
+    if (tabPast) tabPast.addEventListener('click', () => { TenantsComponent.activeTab = 'past'; this.switchTab('tenants'); });
+
+    const cardAddAction = document.getElementById('card-btn-add-tenant-action');
+    if (cardAddAction) cardAddAction.addEventListener('click', () => this.openTenantModal());
+
+    const addBtn = document.getElementById('btn-add-tenant');
+    if (addBtn) addBtn.addEventListener('click', () => this.openTenantModal());
+
+    const searchInput = document.getElementById('tenant-search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        TenantsComponent.searchQuery = e.target.value;
+        this.switchTab('tenants');
+      });
+    }
+
+    document.querySelectorAll('.btn-edit-tenant').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const tenantId = e.currentTarget.getAttribute('data-id');
+        const tenant = this.state.tenants.find(t => t.id === tenantId);
+        if (tenant) this.openTenantModal(tenant);
+      });
+    });
+
+    document.querySelectorAll('.btn-checkout-tenant').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const tenantId = e.currentTarget.getAttribute('data-id');
+        const tenantName = e.currentTarget.getAttribute('data-name');
+        this.openCheckoutTenantModal(tenantId, tenantName);
+      });
+    });
+
+    document.querySelectorAll('.btn-rerent-tenant').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const tenantId = e.currentTarget.getAttribute('data-id');
+        this.openReRentModal(tenantId);
+      });
+    });
+
+    document.querySelectorAll('.btn-hard-delete-tenant, .btn-delete-tenant').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const tenantId = e.currentTarget.getAttribute('data-id');
+        const tenantName = e.currentTarget.getAttribute('data-name');
+        this.openDeleteTenantModal(tenantId, tenantName);
+      });
+    });
+
+    document.querySelectorAll('.btn-gen-contract').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        const tenant = this.state.tenants.find(t => t.id === id);
+        if (tenant) this.openOfficialContractModal(tenant);
+      });
+    });
+
+    document.querySelectorAll('.btn-view-docs').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        const tenant = this.state.tenants.find(t => t.id === id);
+        if (tenant) this.openViewTenantDocsModal(tenant);
+      });
+    });
+  }
+
+  static openCheckoutTenantModal(tenantId, tenantName) {
+    const tenant = this.state.tenants.find(t => t.id === tenantId);
+    const room = tenant ? this.state.rooms.find(r => r.id === tenant.assignedRoomId) : null;
+
+    const modal = document.getElementById('app-modal');
+    const dialog = modal.querySelector('.modal-dialog');
+    dialog.innerHTML = `
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-right-from-bracket text-warning"></i> แจ้งย้ายออก / ย้ายไปประวัติผู้เช่าเก่า</h3>
+        <button class="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>คุณต้องการบันทึกการย้ายออกสำหรับผู้เช่า <strong>"${tenantName}"</strong> ใช่หรือไม่?</p>
+        <p class="text-muted text-sm">
+          <i class="fa-solid fa-circle-info text-info"></i> ข้อมูลผู้เช่ารายนี้จะถูกย้ายไปที่ <strong>"📜 ประวัติผู้เช่าเก่า"</strong> เพื่อเก็บประวัติไว้ หากผู้เช่ากลับมาเช่าอีกครั้งในอนาคต สามารถเลือกดึงข้อมูลเดิมกลับมาใช้ได้ทันที
+        </p>
+
+        ${room ? `
+          <div style="background:#fef3c7; border:1px solid #f59e0b; border-radius:8px; padding:1rem; margin-top:1rem;">
+            <p style="margin:0 0 0.5rem 0; font-weight:700; color:#92400e;">
+              <i class="fa-solid fa-door-open"></i> ห้องพักที่คืน: ห้อง ${room.name} (จะเปลี่ยนสถานะเป็น "ว่าง")
+            </p>
+            <label style="display:flex; align-items:flex-start; gap:0.5rem; cursor:pointer;">
+              <input type="checkbox" id="chk-reset-meters" style="margin-top:0.2rem;">
+              <span>
+                <strong>รีเซ็ตเลขมิเตอร์ไฟ-น้ำของห้อง ${room.name} เป็น 0</strong><br>
+                <span class="text-muted text-sm">(ไม่แนะนำถ้าผู้เช่าคนต่อไปใช้อ่านเลขมิเตอร์ต่อเนื่องจากเลขเดิม)</span>
+              </span>
+            </label>
+          </div>
+        ` : ''}
+
+        <div style="display:flex; gap:0.75rem; margin-top:1.5rem;">
+          <button id="btn-confirm-checkout" class="btn btn-warning" style="flex:1; font-weight:700;">
+            <i class="fa-solid fa-box-archive"></i> ยืนยันย้ายออก (ย้ายไปผู้เช่าเก่า)
+          </button>
+          <button class="btn btn-secondary close-modal-btn" style="flex:1;">ยกเลิก</button>
+        </div>
+      </div>
+    `;
+    modal.classList.add('active');
+    modal.querySelectorAll('.close-modal-btn').forEach(b => b.addEventListener('click', () => modal.classList.remove('active')));
+
+    document.getElementById('btn-confirm-checkout').addEventListener('click', () => {
+      const resetMeters = room ? document.getElementById('chk-reset-meters').checked : false;
+      modal.classList.remove('active');
+      this.checkoutTenant(tenantId, resetMeters);
+    });
+  }
+
+  static checkoutTenant(tenantId, resetMeters = false) {
+    const tenant = this.state.tenants.find(t => t.id === tenantId);
+    if (!tenant) return;
+
+    const assignedRoomId = tenant.assignedRoomId;
+    const room = this.state.rooms.find(r => r.id === assignedRoomId);
+
+    if (room) {
+      tenant.lastRoomName = room.name;
+      room.status = 'vacant';
+      room.currentTenantId = null;
+      room.currentTenantName = null;
+      if (resetMeters) {
+        room.lastElecMeter = 0;
+        room.lastWaterMeter = 0;
+      }
+    }
+
+    tenant.status = 'past';
+    tenant.assignedRoomId = null;
+    tenant.endDate = new Date().toISOString().slice(0, 10);
+
+    DBService.saveState(this.state);
+    TenantsComponent.activeTab = 'past';
+    alert(`🟢 ย้ายผู้เช่า "${tenant.name}" ไปที่ประวัติผู้เช่าเก่าเรียบร้อยแล้ว!`);
+    this.switchTab('tenants');
+  }
+
+  static openReRentModal(tenantId) {
+    const tenant = this.state.tenants.find(t => t.id === tenantId);
+    if (!tenant) return;
+
+    const vacantRooms = (this.state.rooms || []).filter(r => r.status === 'vacant');
+    const todayStr = Formatters.thaiDate(new Date().toISOString().slice(0, 10));
+
+    const modal = document.getElementById('app-modal');
+    const dialog = modal.querySelector('.modal-dialog');
+
+    dialog.innerHTML = `
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-rotate-left text-success"></i> นำผู้เช่าเดิมกลับมาเช่าใหม่</h3>
+        <button class="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:1rem; margin-bottom:1.25rem;">
+          <h4 style="margin:0 0 0.35rem 0; color:#166534;"><i class="fa-solid fa-user-check"></i> ผู้เช่าเดิม: <strong>${tenant.name}</strong></h4>
+          <p style="margin:0; font-size:0.85rem; color:#15803d;">
+            เลขบัตรประชาชน: <code>${Formatters.formatIdCard(tenant.idCard)}</code> | เบอร์โทร: ${tenant.tel}
+          </p>
+        </div>
+
+        ${vacantRooms.length === 0 ? `
+          <div style="background:#fef2f2; border:1px solid #fca5a5; color:#991b1b; padding:1rem; border-radius:8px;">
+            <i class="fa-solid fa-triangle-exclamation"></i> <strong>ไม่มีห้องว่างในขณะนี้:</strong> กรุณาเพิ่มห้องว่าง หรือย้ายออกห้องอื่นก่อนนำผู้เช่าเดิมกลับมาเข้าพัก
+          </div>
+        ` : `
+          <form id="form-rerent">
+            <div class="form-group" style="margin-bottom:1rem;">
+              <label style="font-weight:600;"><i class="fa-solid fa-door-open text-primary"></i> เลือกห้องว่างที่ต้องการให้เข้าพัก *:</label>
+              <select id="rerent-room-id" class="form-control" required style="padding:0.6rem;">
+                <option value="">-- เลือกห้องว่าง --</option>
+                ${vacantRooms.map(r => `<option value="${r.id}">ห้อง ${r.name} (ชั้น ${r.floor} - ค่าเช่า ${Formatters.currency(r.baseRent)})</option>`).join('')}
+              </select>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom:1rem;">
+              <div class="form-group">
+                <label style="font-weight:600;">วันเริ่มสัญญาใหม่ *:</label>
+                <input type="text" id="rerent-start-date" class="form-control" value="${todayStr}" placeholder="01/08/2569" required style="padding:0.6rem;">
+              </div>
+              <div class="form-group">
+                <label style="font-weight:600;">วันหมดสัญญาใหม่:</label>
+                <input type="text" id="rerent-end-date" class="form-control" value="31/07/2571" placeholder="31/07/2571" style="padding:0.6rem;">
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-full" style="padding:0.75rem; font-weight:700; font-size:1rem;">
+              <i class="fa-solid fa-check"></i> นำผู้เช่าเดิมเข้าพักห้องใหม่ทันที
+            </button>
+          </form>
+        `}
+      </div>
+    `;
+
+    modal.classList.add('active');
+    modal.querySelectorAll('.close-modal-btn').forEach(b => b.addEventListener('click', () => modal.classList.remove('active')));
+
+    const formRerent = document.getElementById('form-rerent');
+    if (formRerent) {
+      formRerent.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const roomId = document.getElementById('rerent-room-id').value;
+        const startDate = document.getElementById('rerent-start-date').value;
+        const endDate = document.getElementById('rerent-end-date').value;
+        modal.classList.remove('active');
+        this.reRentTenant(tenantId, roomId, startDate, endDate);
+      });
+    }
+  }
+
+  static reRentTenant(tenantId, roomId, startDate, endDate) {
+    const tenant = this.state.tenants.find(t => t.id === tenantId);
+    const room = this.state.rooms.find(r => r.id === roomId);
+
+    if (!tenant || !room) return;
+
+    tenant.status = 'active';
+    tenant.assignedRoomId = room.id;
+    tenant.startDate = startDate;
+    tenant.endDate = endDate;
+
+    room.status = 'occupied';
+    room.currentTenantId = tenant.id;
+    room.currentTenantName = tenant.name;
+    room.entryDate = startDate;
+
+    DBService.saveState(this.state);
+    TenantsComponent.activeTab = 'active';
+    alert(`🟢 นำผู้เช่า "${tenant.name}" กลับเข้าพักห้อง ${room.name} เรียบร้อยแล้ว!`);
+    this.switchTab('tenants');
+  }
+
+  static openDeleteTenantModal(tenantId, tenantName) {
+    const tenant = this.state.tenants.find(t => t.id === tenantId);
+    const room = tenant ? this.state.rooms.find(r => r.id === tenant.assignedRoomId) : null;
+    const relatedInvoiceCount = room ? this.state.invoices.filter(i => i.roomId === room.id).length : 0;
+
+    const modal = document.getElementById('app-modal');
+    const dialog = modal.querySelector('.modal-dialog');
+    dialog.innerHTML = `
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-triangle-exclamation text-danger"></i> ลบข้อมูลผู้เช่าถาวร</h3>
+        <button class="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>คุณต้องการลบข้อมูลผู้เช่า <strong>"${tenantName}"</strong> ออกจากระบบถาวรใช่หรือไม่?</p>
+        <p class="text-danger text-sm">⚠️ การลบถาวรจะลบประวัติผู้เช่ารายนี้ออกจากระบบทันที (แนะนำให้ใช้การ "ย้ายออก" เพื่อเก็บประวัติไว้)</p>
+
+        ${room ? `
+          <div style="background:#fef3c7; border:1px solid #f59e0b; border-radius:8px; padding:1rem; margin-top:1rem;">
+            <label style="display:flex; align-items:flex-start; gap:0.5rem; cursor:pointer; margin-bottom:0.75rem;">
+              <input type="checkbox" id="chk-reset-meters" checked style="margin-top:0.2rem;">
+              <span>
+                <strong>เคลียร์เลขมิเตอร์น้ำ-ไฟของห้อง ${room.name} เป็น 0</strong>
+              </span>
+            </label>
+            ${relatedInvoiceCount > 0 ? `
+              <label style="display:flex; align-items:flex-start; gap:0.5rem; cursor:pointer;">
+                <input type="checkbox" id="chk-delete-invoices" style="margin-top:0.2rem;">
+                <span>
+                  <strong>ลบบิล/ใบแจ้งหนี้ทั้งหมดของห้อง ${room.name} ด้วย (${relatedInvoiceCount} ใบ)</strong>
+                </span>
+              </label>
+            ` : ''}
+          </div>
+        ` : ''}
+
+        <div style="display:flex; gap:0.75rem; margin-top:1.5rem;">
+          <button id="btn-confirm-delete-tenant" class="btn btn-danger" style="flex:1;"><i class="fa-solid fa-trash"></i> ยืนยันลบถาวร</button>
+          <button class="btn btn-secondary close-modal-btn" style="flex:1;">ยกเลิก</button>
+        </div>
+      </div>
+    `;
+    modal.classList.add('active');
+    modal.querySelectorAll('.close-modal-btn').forEach(b => b.addEventListener('click', () => modal.classList.remove('active')));
+
+    document.getElementById('btn-confirm-delete-tenant').addEventListener('click', () => {
+      const resetMeters = room ? document.getElementById('chk-reset-meters').checked : false;
+      const deleteInvoicesChk = document.getElementById('chk-delete-invoices');
+      const deleteInvoices = deleteInvoicesChk ? deleteInvoicesChk.checked : false;
+      modal.classList.remove('active');
+      this.deleteTenant(tenantId, { resetMeters, deleteInvoices });
     });
   }
 
@@ -8469,6 +9061,38 @@ class App {
     const addLedgerBtn = document.getElementById('btn-add-ledger');
     if (addLedgerBtn) {
       addLedgerBtn.addEventListener('click', () => this.openLedgerModal());
+    }
+
+    const cardAddLedger = document.getElementById('card-btn-add-ledger');
+    if (cardAddLedger) {
+      cardAddLedger.addEventListener('click', () => this.openLedgerModal());
+    }
+
+    // ERP Cards & Filter Tabs
+    const cardIncome = document.getElementById('card-tab-income');
+    const tabIncome = document.getElementById('ledger-tab-income');
+    if (cardIncome) cardIncome.addEventListener('click', () => { AccountingComponent.activeTab = 'income'; this.switchTab('accounting'); });
+    if (tabIncome) tabIncome.addEventListener('click', () => { AccountingComponent.activeTab = 'income'; this.switchTab('accounting'); });
+
+    const cardExpense = document.getElementById('card-tab-expense');
+    const tabExpense = document.getElementById('ledger-tab-expense');
+    if (cardExpense) cardExpense.addEventListener('click', () => { AccountingComponent.activeTab = 'expense'; this.switchTab('accounting'); });
+    if (tabExpense) tabExpense.addEventListener('click', () => { AccountingComponent.activeTab = 'expense'; this.switchTab('accounting'); });
+
+    const cardAuto = document.getElementById('card-tab-auto');
+    const tabAuto = document.getElementById('ledger-tab-auto');
+    if (cardAuto) cardAuto.addEventListener('click', () => { AccountingComponent.activeTab = 'auto'; this.switchTab('accounting'); });
+    if (tabAuto) tabAuto.addEventListener('click', () => { AccountingComponent.activeTab = 'auto'; this.switchTab('accounting'); });
+
+    const tabAll = document.getElementById('ledger-tab-all');
+    if (tabAll) tabAll.addEventListener('click', () => { AccountingComponent.activeTab = 'all'; this.switchTab('accounting'); });
+
+    const searchInput = document.getElementById('ledger-search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        AccountingComponent.searchQuery = e.target.value;
+        this.switchTab('accounting');
+      });
     }
 
     document.querySelectorAll('.btn-delete-ledger').forEach(btn => {
