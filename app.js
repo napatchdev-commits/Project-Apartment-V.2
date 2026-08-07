@@ -1195,7 +1195,7 @@ class DBService {
     return {
       settings: {
         table: 'settings',
-        fields: [['apartmentName','apartment_name'],['ownerName','owner_name'],['address','address'],['tel','tel'],['lineId','line_id'],
+        fields: [['apartmentName','apartment_name'],['address','address'],['tel','tel'],['lineId','line_id'],
                  ['bankName','bank_name'],['bankAccountNo','bank_account_no'],['bankAccountName','bank_account_name'],
                  ['promptPayId','prompt_pay_id'],
                  ['lineToken','line_token'],['lineUserId','line_user_id'],['lineNotifyToken','line_notify_token']]
