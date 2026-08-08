@@ -552,6 +552,15 @@ class MyBillsApp {
     TenantDBService.getSavedSupabaseUrl();
     TenantDBService.getSavedTenantApiKey();
 
+    // Clean up sensitive keys from URL parameters after they have been parsed & stored
+    let cleanParamsChanged = false;
+    if (urlParams.has('supabaseUrl')) { urlParams.delete('supabaseUrl'); cleanParamsChanged = true; }
+    if (urlParams.has('sheetUrl')) { urlParams.delete('sheetUrl'); cleanParamsChanged = true; }
+    if (urlParams.has('apiKey')) { urlParams.delete('apiKey'); cleanParamsChanged = true; }
+    if (cleanParamsChanged) {
+      window.history.replaceState({}, document.title, window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : ''));
+    }
+
     // Auto-detect and apply system dark mode
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       document.body.classList.add('dark');

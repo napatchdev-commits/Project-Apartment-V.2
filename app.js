@@ -332,61 +332,44 @@ class PromptPayService {
 class LineService {
   static createBillingMessage(invoice, propertyName, tenantUrl, lineBotUrl, isBroadcast = false) {
     const aptName = propertyName || 'ระบบจัดการหอพัก';
-    let url = tenantUrl || (localStorage.getItem('SOMBAT_TENANT_PORTAL_URL') || (window.location.origin + '/tenant.html'));
+    const url = DBService.getTenantPortalUrl(tenantUrl);
     const botUrl = lineBotUrl !== undefined ? lineBotUrl : (localStorage.getItem('SOMBAT_LINE_BOT_URL') || '');
-
-    // Append sheetUrl + apiKey (สิทธิ์จำกัดสำหรับผู้เช่า) ไปกับลิงก์ ให้พอร์ทัลผู้เช่าดึงข้อมูลจริงได้
-    const savedUrl = DBService.getSavedSupabaseUrl();
-    const savedTenantKey = localStorage.getItem('SOMBAT_APARTMENT_SAVED_TENANT_API_KEY') || '';
-    if (savedUrl) {
-      const sep = url.includes('?') ? '&' : '?';
-      url += `${sep}supabaseUrl=${encodeURIComponent(savedUrl)}`;
-      if (savedTenantKey) url += `&apiKey=${encodeURIComponent(savedTenantKey)}`;
-    }
-
+ 
     const greeting = (isBroadcast || !invoice || !invoice.tenantName) 
       ? 'เรียนผู้เช่าทุกท่าน' 
       : `เรียน คุณ${invoice.tenantName}`;
-
+ 
     let msg = `🏠 ${aptName}\n\n📢 แจ้งเตือนค่าเช่าประจำเดือน\n\n${greeting}\n\nระบบได้ออกบิลประจำเดือนเรียบร้อยแล้ว\n\nกรุณาเข้าสู่ระบบผู้เช่า\nเพื่อตรวจสอบรายละเอียดบิล\nและอัปโหลดหลักฐานการชำระเงิน\n\nกดที่นี่\n\n${url}`;
-
+ 
     if (botUrl && botUrl.trim()) {
       msg += `\n\nติดต่อสอบถาม / LINE Bot:\n${botUrl.trim()}`;
     }
-
+ 
     msg += `\n\nขอบคุณครับ`;
-
+ 
     return msg;
   }
-
+ 
   static createOverdueMessage(invoice, propertyName, tenantUrl, lineBotUrl) {
     const aptName = propertyName || 'ระบบจัดการหอพัก';
-    let url = tenantUrl || (localStorage.getItem('SOMBAT_TENANT_PORTAL_URL') || (window.location.origin + '/tenant.html'));
+    const url = DBService.getTenantPortalUrl(tenantUrl);
     const botUrl = lineBotUrl !== undefined ? lineBotUrl : (localStorage.getItem('SOMBAT_LINE_BOT_URL') || '');
-
-    const savedUrl = DBService.getSavedSupabaseUrl();
-    const savedTenantKey = localStorage.getItem('SOMBAT_APARTMENT_SAVED_TENANT_API_KEY') || '';
-    if (savedUrl) {
-      const sep = url.includes('?') ? '&' : '?';
-      url += `${sep}supabaseUrl=${encodeURIComponent(savedUrl)}`;
-      if (savedTenantKey) url += `&apiKey=${encodeURIComponent(savedTenantKey)}`;
-    }
-
+ 
     const greeting = (!invoice || !invoice.tenantName) 
       ? 'เรียนผู้เช่า' 
       : `เรียน คุณ${invoice.tenantName} (ห้อง ${invoice.roomName})`;
-
+ 
     const fineAmt = invoice.fineAmount || 0;
     const totalAmt = invoice.totalAmount || 0;
-
+ 
     let msg = `⚠️ แจ้งเตือนค้างชำระค่าเช่าเลยกำหนด ⚠️\n🏠 ${aptName}\n\n${greeting}\n\nขณะนี้บิลรอบเดือน ${invoice.monthKey} ของท่านยังไม่ได้ชำระและเลยกำหนดจ่ายแล้ว\n\n- ยอดค่าเช่าเดิม: ฿${(totalAmt - fineAmt).toLocaleString()}\n- ค่าปรับจ่ายล่าช้า: ฿${fineAmt.toLocaleString()}\n- ยอดค้างชำระรวม: ฿${totalAmt.toLocaleString()}\n\nกรุณาชำระเงินและแนบสลิปโดยด่วนที่สุดผ่านลิงก์ด้านล่างนี้ครับ:\n\n${url}`;
-
+ 
     if (botUrl && botUrl.trim()) {
       msg += `\n\nติดต่อสอบถาม / LINE Bot:\n${botUrl.trim()}`;
     }
-
+ 
     msg += `\n\nขอบคุณครับ`;
-
+ 
     return msg;
   }
 }
@@ -759,6 +742,28 @@ class DBService {
     const fromStorage = localStorage.getItem('SOMBAT_APARTMENT_SAVED_TENANT_API_KEY');
     if (fromStorage && fromStorage.startsWith('eyJ')) return fromStorage;
     return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJkZW93cGRqZ2lvbWJxYXRkaWxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NzA3MjAsImV4cCI6MjEwMTI0NjcyMH0.XBvQzG4aChKQT-kWpHrb2Y1xtCgOwB_M9Ej-NYelgPY';
+  }
+
+  static getTenantPortalUrl(baseUrl = '') {
+    let url = baseUrl || (localStorage.getItem('SOMBAT_TENANT_PORTAL_URL') || (window.location.origin + '/tenant.html'));
+    
+    const savedUrl = this.getSavedSupabaseUrl();
+    const savedTenantKey = this.getSavedTenantApiKey();
+    
+    const defaultUrl = 'https://bdeowpdjgiombqatdilh.supabase.co';
+    const defaultKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJkZW93cGRqZ2lvbWJxYXRkaWxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NzA3MjAsImV4cCI6MjEwMTI0NjcyMH0.XBvQzG4aChKQT-kWpHrb2Y1xtCgOwB_M9Ej-NYelgPY';
+
+    const isCustomUrl = savedUrl && this.cleanUrl(savedUrl) !== this.cleanUrl(defaultUrl);
+    const isCustomKey = savedTenantKey && savedTenantKey !== defaultKey;
+
+    if (isCustomUrl || isCustomKey) {
+      const sep = url.includes('?') ? '&' : '?';
+      const params = [];
+      if (savedUrl) params.push(`supabaseUrl=${encodeURIComponent(this.cleanUrl(savedUrl))}`);
+      if (savedTenantKey) params.push(`apiKey=${encodeURIComponent(savedTenantKey)}`);
+      url += sep + params.join('&');
+    }
+    return url;
   }
 
   static getState() {
@@ -1828,7 +1833,7 @@ class NavbarComponent {
         </div>
 
         <div class="header-right">
-          <a href="tenant.html?apiKey=${encodeURIComponent(DBService.getSavedTenantApiKey())}" target="_blank" class="btn btn-secondary btn-sm" style="margin-right:0.5rem; text-decoration:none;" title="เปิดระบบแจ้งบิลผู้เช่า MyBills">
+          <a href="tenant.html" target="_blank" class="btn btn-secondary btn-sm" style="margin-right:0.5rem; text-decoration:none;" title="เปิดระบบแจ้งบิลผู้เช่า MyBills">
             <i class="fa-solid fa-mobile-screen-button text-success"></i> <span class="desktop-only">เปิดระบบบิลผู้เช่า MyBills</span>
           </a>
 
